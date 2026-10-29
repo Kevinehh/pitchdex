@@ -1,0 +1,69 @@
+.status,
+.error {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.status {
+  color: var(--muted-foreground);
+}
+
+.error {
+  color: var(--destructive);
+}
+
+/* Fills the screen below the header; each column scrolls on its own. */
+.inbox {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: calc(100dvh - 12rem);
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.listArea,
+.conversationArea {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Phones show one column: the list, or the open conversation. */
+.inbox[data-open="true"] .listArea,
+.inbox[data-open="false"] .conversationArea {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .inbox {
+    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+  }
+
+  .inbox[data-open] .listArea,
+  .inbox[data-open] .conversationArea {
+    display: grid;
+  }
+}
+
+.placeholder {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  font-size: var(--text-sm);
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.placeholder svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.placeholder p {
+  margin: 0;
+}

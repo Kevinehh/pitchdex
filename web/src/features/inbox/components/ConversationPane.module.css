@@ -1,0 +1,281 @@
+/* The thread, plus the lead panel beside it on wide screens. */
+.pane {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (min-width: 1280px) {
+  .pane {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+  }
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Phones show the list or a conversation, so a conversation needs a way back. */
+.back {
+  display: inline-grid;
+  place-items: center;
+  color: var(--muted-foreground);
+}
+
+.back svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .back {
+    display: none;
+  }
+}
+
+.who {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.sub {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.starred {
+  fill: currentColor;
+  color: oklch(0.8 0.15 85);
+}
+
+.note,
+.error {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+
+.note {
+  color: var(--muted-foreground);
+}
+
+.error {
+  color: var(--destructive);
+}
+
+/* ---- Messages ---- */
+
+.messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.day::before,
+.day::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.message {
+  display: flex;
+}
+
+.outbound {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: min(36rem, 85%);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+}
+
+.inbound .bubble {
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 0.25rem;
+  background: var(--muted);
+}
+
+.outbound .bubble {
+  border-bottom-right-radius: 0.25rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+.meta svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.subject {
+  font-weight: 400;
+}
+
+.body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.footer {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs);
+  text-align: right;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Reply ---- */
+
+.composer {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.composerTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.channels {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.subjectInput {
+  flex: 1;
+  min-width: 12rem;
+  height: 2rem;
+}
+
+.composeRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.replyBox {
+  flex: 1;
+  min-height: 4.5rem;
+  max-height: 14rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.notice a {
+  color: var(--foreground);
+}
+
+.composer .error {
+  padding: 0;
+  border: 0;
+}
+
+/* ---- Loading and problems ---- */
+
+.loading {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.skeleton {
+  width: 60%;
+  height: 4rem;
+}
+
+.right {
+  justify-self: end;
+}
+
+.problem {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.problem p {
+  margin: 0;
+}

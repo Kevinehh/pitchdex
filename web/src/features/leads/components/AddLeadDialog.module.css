@@ -1,0 +1,14 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.formError {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--destructive);
+}
+
+.select {
+  width: 100%;
+}

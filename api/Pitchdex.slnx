@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pitchdex.Api/Pitchdex.Api.csproj" />
+    <Project Path="src/Pitchdex.Application/Pitchdex.Application.csproj" />
+    <Project Path="src/Pitchdex.Domain/Pitchdex.Domain.csproj" />
+    <Project Path="src/Pitchdex.Infrastructure/Pitchdex.Infrastructure.csproj" />
+  </Folder>
+</Solution>

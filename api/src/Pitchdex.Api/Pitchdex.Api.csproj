@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <!-- Local secrets such as the Unipile key: dotnet user-secrets set "Messaging:UnipileApiKey" "..." -->
+    <UserSecretsId>pitchdex-api-7d3f1c2a</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pitchdex.Application\Pitchdex.Application.csproj" />
+    <ProjectReference Include="..\Pitchdex.Infrastructure\Pitchdex.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+</Project>

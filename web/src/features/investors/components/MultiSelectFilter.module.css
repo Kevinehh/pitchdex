@@ -1,0 +1,22 @@
+.trigger {
+  min-width: 8.5rem;
+  max-width: 14rem;
+}
+
+/* A filter with values chosen stands out from the untouched ones. */
+.active {
+  border-color: var(--primary);
+}
+
+/* Wide enough for long options like "Mobility / Transportation", never narrower than the button. */
+.popup {
+  width: max-content;
+  min-width: var(--anchor-width);
+  max-width: 20rem;
+}
+
+.label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

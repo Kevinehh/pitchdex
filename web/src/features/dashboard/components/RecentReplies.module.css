@@ -1,0 +1,52 @@
+/* The whole row opens the conversation. */
+.link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover .reply {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reply {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.from {
+  font-weight: 600;
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) 0;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.empty p {
+  margin: 0;
+}
+
+.loading {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.skeleton {
+  height: 2rem;
+  width: 100%;
+}

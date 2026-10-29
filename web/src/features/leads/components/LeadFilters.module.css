@@ -1,0 +1,35 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.search {
+  position: relative;
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 0.625rem;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 2rem;
+}
+
+.status {
+  width: 11rem;
+}
+
+.campaign {
+  width: 13rem;
+}

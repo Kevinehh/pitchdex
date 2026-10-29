@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Editors and OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Local sample data. The investor file holds real people's public profiles.
+data/
+
+# Local environment files
+.env
+.env.*
+!.env.example

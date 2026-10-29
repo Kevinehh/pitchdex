@@ -1,0 +1,93 @@
+.panel {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.overview {
+  width: 32%;
+  min-width: 14rem;
+  max-width: 24rem;
+}
+
+.name {
+  display: block;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+  color: var(--foreground);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.metrics {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 9rem;
+  margin: 0;
+}
+
+.metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.metricLabel {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.metricValue {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricDetail {
+  margin-left: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+/* A fixed width, so switching between Running and Paused doesn't shift the other columns. */
+.statusHead {
+  width: 10rem;
+}
+
+.statusCell {
+  width: 10rem;
+  white-space: nowrap;
+}
+
+.date {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.skeletonRow {
+  height: 4rem;
+  width: 100%;
+}

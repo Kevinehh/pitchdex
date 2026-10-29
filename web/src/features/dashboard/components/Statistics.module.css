@@ -1,0 +1,109 @@
+.panel {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.period {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+/* One column per kind of send, divided like Dripify's. */
+.rings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ringItem {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  text-align: center;
+}
+
+.ringItem + .ringItem {
+  border-left: 1px solid var(--border);
+}
+
+.count {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.limit {
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+.ringLabel {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.connect {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.cardLabel {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.cardRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.cardValue {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.change {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}

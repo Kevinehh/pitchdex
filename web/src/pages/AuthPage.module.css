@@ -1,0 +1,16 @@
+.heading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.description {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}

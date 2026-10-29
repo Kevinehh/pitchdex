@@ -1,0 +1,35 @@
+/* Looks like the plain header text until hovered, so sortable columns don't shout. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0 calc(-1 * var(--space-1));
+  padding: var(--space-1);
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--muted);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+.active .icon {
+  color: var(--foreground);
+  opacity: 1;
+}

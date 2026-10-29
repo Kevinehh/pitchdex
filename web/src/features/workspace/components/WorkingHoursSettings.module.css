@@ -1,0 +1,30 @@
+.form {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 34rem;
+}
+
+.select {
+  width: 100%;
+}
+
+.hours {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.muted,
+.error {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.error {
+  color: var(--destructive);
+}

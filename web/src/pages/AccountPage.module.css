@@ -1,0 +1,90 @@
+.notice,
+.failed {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm);
+}
+
+.notice {
+  background: color-mix(in oklch, var(--success) 15%, transparent);
+  color: var(--success);
+}
+
+.failed {
+  background: color-mix(in oklch, var(--destructive) 15%, transparent);
+  color: var(--destructive);
+}
+
+/* The tabs and their content sit on one card, as in Dripify. */
+.card {
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+/* Login on the left, LinkedIn on the right, split by a line on wide screens. */
+.columns {
+  display: grid;
+  gap: var(--space-8);
+  padding-top: var(--space-6);
+}
+
+@media (min-width: 1000px) {
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .columns > .section + .section {
+    padding-left: var(--space-8);
+    border-left: 1px solid var(--border);
+  }
+}
+
+.single {
+  max-width: 40rem;
+  padding-top: var(--space-6);
+}
+
+.section {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.text {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+/* Login, name and password, each under its own small heading and divided by a line. */
+.subsection {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.login {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--muted);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}

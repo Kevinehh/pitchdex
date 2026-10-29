@@ -1,0 +1,61 @@
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: calc(100% - var(--space-6));
+  margin: 0 var(--space-3) var(--space-3);
+  padding: var(--space-2);
+  border: 0;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--sidebar-foreground);
+  text-align: left;
+  cursor: pointer;
+}
+
+.trigger:hover,
+.trigger[data-popup-open] {
+  background: var(--sidebar-accent);
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+/* The popup shares the sidebar's colour, so a border, a lighter fill and a shadow set it apart. */
+.menu {
+  min-width: 13rem;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  box-shadow: 0 12px 32px oklch(0 0 0 / 0.45);
+}
+
+.email {
+  overflow: hidden;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+}
+
+/*
+ * The menu already uses the accent grey, which is also the default highlight colour, so
+ * a hovered or keyboard-focused item gets a shade lighter to stand out.
+ */
+.menu [role="menuitem"][data-highlighted],
+.menu [role="menuitem"]:focus-visible {
+  background: color-mix(in oklch, var(--accent), var(--foreground) 12%);
+}

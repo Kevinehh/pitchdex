@@ -1,0 +1,157 @@
+.shell {
+  display: flex;
+  min-height: 100svh;
+  background: var(--background);
+}
+
+/* Thin bar across the top while the next page's code is loading. */
+.loadingBar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: 2px;
+  background: var(--primary);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: none;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 15rem;
+  height: 100svh;
+  border-right: 1px solid var(--sidebar-border);
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  height: 3.5rem;
+  padding: 0 var(--space-5);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+}
+
+.divider {
+  margin: var(--space-3) var(--space-3);
+  border: 0;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+.link:hover,
+.link.active {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.linkIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Phones: brand plus a sideways-scrolling row of links instead of the sidebar. */
+.mobileHeader {
+  border-bottom: 1px solid var(--sidebar-border);
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}
+
+.mobileBrand {
+  padding: var(--space-3) var(--space-4) 0;
+  font-weight: 600;
+}
+
+.mobileNav {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  overflow-x: auto;
+}
+
+.mobileNav .link {
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+}
+
+.main {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  flex: 1;
+  padding: var(--space-4);
+}
+
+/* Pages with wide tables use the whole screen, up to a limit for very wide monitors. */
+.main.wide {
+  max-width: 100rem;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+  }
+
+  .mobileHeader {
+    display: none;
+  }
+
+  .main {
+    padding: var(--space-8);
+  }
+}
+
+.badge {
+  margin-left: auto;
+  min-width: 1.25rem;
+  padding: 0 var(--space-1);
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

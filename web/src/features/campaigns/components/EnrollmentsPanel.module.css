@@ -1,0 +1,85 @@
+.panel {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.count {
+  margin-left: var(--space-1);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.table {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+/* Dims the rows while the next page loads, so the click feels acknowledged. */
+.loadingNext {
+  opacity: 0.6;
+}
+
+.lead,
+.next {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+/* Why a lead is waiting or failed: "Waiting: this mailbox has sent its 30 emails…" */
+.note {
+  max-width: 28rem;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  white-space: normal;
+}
+
+.action {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--destructive);
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.skeletonRow {
+  height: 2.25rem;
+  width: 100%;
+}

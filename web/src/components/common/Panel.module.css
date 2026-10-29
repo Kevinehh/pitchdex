@@ -1,0 +1,76 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5) var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.action {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.action:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.body {
+  padding: 0 var(--space-5) var(--space-3);
+}
+
+/* A divided list of rows, used by most dashboard panels. */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+  padding-block: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.row + .row {
+  border-top: 1px solid var(--border);
+}
+
+/* Small grey text pinned to the right of a row: a time, a count, a source. */
+.meta {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+a.meta:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

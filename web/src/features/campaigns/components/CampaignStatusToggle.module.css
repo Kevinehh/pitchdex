@@ -1,0 +1,35 @@
+.toggle {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.draft {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.draft:hover {
+  color: var(--foreground);
+}
+
+/* Why resuming failed, like a disconnected mailbox. Kept short; the rest shows on hover. */
+.error {
+  max-width: 10rem;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--text-xs);
+  color: var(--destructive);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

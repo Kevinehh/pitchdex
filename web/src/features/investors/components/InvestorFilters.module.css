@@ -1,0 +1,45 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.search {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 0.625rem;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 2rem;
+}
+
+.dropdowns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.checkSize {
+  min-width: 9rem;
+}
+
+.checkSizeActive {
+  border-color: var(--primary);
+}
+
+.checkSizePopup {
+  width: max-content;
+  min-width: var(--anchor-width);
+}
