@@ -1,4 +1,10 @@
+/*
+ * --page-width: how wide a page's content gets on very big monitors, kept against the sidebar
+ * rather than centred. --gutter: the space beside it.
+ */
 .shell {
+  --page-width: 120rem;
+  --gutter: var(--space-4);
   display: flex;
   min-height: 100svh;
   background: var(--background);
@@ -36,6 +42,7 @@
 .brand {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   height: 3.5rem;
   padding: 0 var(--space-5);
   font-size: var(--text-base);
@@ -45,15 +52,20 @@
 
 .nav {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--space-1);
-  padding: 0 var(--space-3);
+  min-height: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  overflow-y: auto;
 }
 
-.divider {
-  margin: var(--space-3) var(--space-3);
-  border: 0;
-  border-top: 1px solid var(--sidebar-border);
+/* The setup reminder and Settings sit at the bottom of the sidebar. */
+.navFoot {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-4);
 }
 
 .link {
@@ -72,10 +84,18 @@
     color 120ms;
 }
 
-.link:hover,
+.link:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .link.active {
   background: var(--sidebar-accent);
   color: var(--sidebar-accent-foreground);
+}
+
+.link.active .linkIcon {
+  color: var(--brand);
 }
 
 .linkIcon {
@@ -91,23 +111,47 @@
   min-width: 0;
 }
 
-/* Phones: brand plus a sideways-scrolling row of links instead of the sidebar. */
-.mobileHeader {
-  border-bottom: 1px solid var(--sidebar-border);
-  background: var(--sidebar);
-  color: var(--sidebar-foreground);
+/* Search and the account menu; on phones, the brand too. Stays put while the page scrolls. */
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 3.5rem;
+  padding: 0 var(--gutter);
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+
+/*
+ * On wide screens the search area takes the free space, pushing the account menu to the right
+ * edge. (Not "last child gets margin-left: auto": the open menu adds an element after the
+ * avatar, which made the avatar jump left.)
+ */
+.search {
+  display: flex;
+  flex: none;
+  min-width: 0;
 }
 
 .mobileBrand {
-  padding: var(--space-3) var(--space-4) 0;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
   font-weight: 600;
 }
 
+/* Phones: a sideways-scrolling row of links instead of the sidebar. */
 .mobileNav {
   display: flex;
   gap: var(--space-1);
   padding: var(--space-2);
   overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--sidebar);
 }
 
 .mobileNav .link {
@@ -117,28 +161,31 @@
 
 .main {
   width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+  max-width: calc(var(--page-width) + 2 * var(--gutter));
   flex: 1;
-  padding: var(--space-4);
-}
-
-/* Pages with wide tables use the whole screen, up to a limit for very wide monitors. */
-.main.wide {
-  max-width: 100rem;
+  padding: var(--gutter);
 }
 
 @media (min-width: 768px) {
+  .shell {
+    --gutter: var(--space-8);
+  }
+
   .sidebar {
     display: flex;
   }
 
-  .mobileHeader {
+  .mobileBrand,
+  .mobileNav {
     display: none;
   }
 
+  .search {
+    flex: 1;
+  }
+
   .main {
-    padding: var(--space-8);
+    padding-block: var(--space-6) var(--space-8);
   }
 }
 

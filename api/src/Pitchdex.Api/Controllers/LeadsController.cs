@@ -44,6 +44,21 @@ public sealed class LeadsController : ControllerBase
         CancellationToken ct) =>
         handler.Handle(id, command, ct);
 
+    /// <summary>
+    /// The lead's LinkedIn profile with work history and education, looked up live. Counts as
+    /// a LinkedIn profile view, so the web app caches it.
+    /// </summary>
+    [HttpGet("{id:guid}/linkedin")]
+    [ProducesResponseType<LinkedInProfileDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status502BadGateway)]
+    public Task<LinkedInProfileDto> LinkedInProfile(
+        Guid id,
+        [FromServices] GetLinkedInProfileHandler handler,
+        CancellationToken ct) =>
+        handler.Handle(id, ct);
+
     /// <summary>Saves an investor from Explore as a lead. 201 when new, 200 when it already was one.</summary>
     [HttpPost("from-investor")]
     [ProducesResponseType<LeadDto>(StatusCodes.Status201Created)]

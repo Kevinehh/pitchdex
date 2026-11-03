@@ -95,6 +95,7 @@ public sealed class ListLeadsHandler(IAppDbContext db)
                 l.Status,
                 l.IsStarred,
                 l.InvestorId,
+                LeadDto.LinkedInOf(l.LinkedIn),
                 db.Enrollments
                     .Where(e => e.LeadId == l.Id)
                     .OrderBy(e => e.CreatedAt)

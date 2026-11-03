@@ -26,3 +26,6 @@ export const LEAD_STATUSES = [
   "Meeting",
   "Passed",
 ] as const satisfies readonly LeadStatus[]
+
+export type LeadLinkedIn = components["schemas"]["LeadLinkedInDto"]
+export type LinkedInDegree = NonNullable<components["schemas"]["LinkedInDegree"]>

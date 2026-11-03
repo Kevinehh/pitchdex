@@ -56,6 +56,14 @@
   gap: var(--space-1);
 }
 
+/* Smaller than the Inbox's, to keep table rows compact. */
+.avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: var(--space-1);
+  font-size: 0.625rem;
+}
+
 /* Faint until hovered or starred, so a long list isn't a column of stars. */
 .star {
   color: var(--muted-foreground);
@@ -70,7 +78,7 @@ tr:hover .star,
 
 .starred svg {
   fill: currentColor;
-  color: oklch(0.8 0.15 85);
+  color: var(--star);
 }
 
 .campaigns {

@@ -1,8 +1,7 @@
 import type { ComponentType } from "react"
-import { createBrowserRouter, Navigate } from "react-router"
+import { createBrowserRouter } from "react-router"
 import { AppLoading } from "@/app/AppLoading"
 import { RouteError } from "@/app/RouteError"
-import type { RouteHandle } from "@/app/routeHandle"
 import { redirectIfSignedIn, requireSession } from "@/app/sessionLoaders"
 import { AppLayout } from "@/layouts/AppLayout"
 import { AuthLayout } from "@/layouts/AuthLayout"
@@ -13,6 +12,23 @@ const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({
 })
 
 export const router = createBrowserRouter([
+  {
+    // The public front page. Someone signed in goes straight to their dashboard.
+    index: true,
+    loader: redirectIfSignedIn,
+    lazy: page(() => import("@/pages/LandingPage")),
+    hydrateFallbackElement: <AppLoading />,
+    errorElement: <RouteError />,
+  },
+  {
+    // The legal pages, open to everyone, signed in or not.
+    hydrateFallbackElement: <AppLoading />,
+    errorElement: <RouteError />,
+    children: [
+      { path: "privacy", lazy: page(() => import("@/pages/PrivacyPage")) },
+      { path: "terms", lazy: page(() => import("@/pages/TermsPage")) },
+    ],
+  },
   {
     // Signed-out screens. Sign-in and sign-up skip ahead for someone already signed in;
     // the password pages work either way.
@@ -42,26 +58,23 @@ export const router = createBrowserRouter([
         // Errors inside a page show here, and the sidebar stays usable.
         errorElement: <RouteError />,
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "dashboard", lazy: page(() => import("@/pages/DashboardPage")) },
           {
             path: "explore",
             lazy: page(() => import("@/pages/ExplorePage")),
-            handle: { wide: true } satisfies RouteHandle,
           },
           { path: "campaigns", lazy: page(() => import("@/pages/CampaignsPage")) },
           { path: "campaigns/:id", lazy: page(() => import("@/pages/CampaignPage")) },
           {
             path: "leads",
             lazy: page(() => import("@/pages/LeadsPage")),
-            handle: { wide: true } satisfies RouteHandle,
           },
           {
             // The open conversation is in the address, so it can be linked to and survives a refresh.
             path: "inbox/:leadId?",
             lazy: page(() => import("@/pages/InboxPage")),
-            handle: { wide: true } satisfies RouteHandle,
           },
+          { path: "calendar", lazy: page(() => import("@/pages/CalendarPage")) },
           { path: "analytics", lazy: page(() => import("@/pages/AnalyticsPage")) },
           { path: "resources", lazy: page(() => import("@/pages/ResourcesPage")) },
           { path: "account", lazy: page(() => import("@/pages/AccountPage")) },

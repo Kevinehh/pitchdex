@@ -27,6 +27,12 @@ public sealed class Workspace : IHasTimestamps
 
     public bool WeekdaysOnly { get; set; } = true;
 
+    /// <summary>The founder's booking page. Fills {{calendly}} in campaign steps and can be added to replies.</summary>
+    public string? CalendlyUrl { get; set; }
+
+    /// <summary>The connected Calendly account that bookings are read from. Empty when not connected.</summary>
+    public CalendlyConnection? Calendly { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

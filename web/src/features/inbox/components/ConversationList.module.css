@@ -110,7 +110,7 @@
   width: 0.875rem;
   height: 0.875rem;
   fill: currentColor;
-  color: oklch(0.8 0.15 85);
+  color: var(--star);
 }
 
 .time {

@@ -72,10 +72,12 @@ export function ConversationPane({ leadId }: { leadId: string }) {
           <Link to="/inbox" className={styles.back} aria-label="Back to conversations">
             <ArrowLeft />
           </Link>
-          <Avatar name={lead.fullName} />
+          <Avatar name={lead.fullName} src={lead.linkedIn?.pictureUrl} />
           <div className={styles.who}>
             <h2 className={styles.name}>{lead.fullName}</h2>
-            <p className={styles.sub}>{[lead.title, lead.firm].filter(Boolean).join(" · ")}</p>
+            <p className={styles.sub}>
+              {lead.linkedIn?.headline ?? [lead.title, lead.firm].filter(Boolean).join(" · ")}
+            </p>
           </div>
           <div className={styles.actions}>
             <Button

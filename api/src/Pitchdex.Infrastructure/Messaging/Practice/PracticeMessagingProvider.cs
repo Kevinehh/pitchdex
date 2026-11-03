@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Pitchdex.Application.Integrations;
 using Pitchdex.Domain.Accounts;
+using Pitchdex.Domain.Leads;
 using Pitchdex.Domain.Messages;
 using Pitchdex.Infrastructure.Persistence;
 
@@ -73,6 +74,12 @@ public sealed class PracticeMessagingProvider(MessagingSettings settings, TimePr
         return _accounts.GetValueOrDefault(externalId);
     }
 
+    public async Task RemoveAccountAsync(string externalId, CancellationToken ct)
+    {
+        await EnsureLoadedAsync(ct);
+        _accounts.TryRemove(externalId, out _);
+    }
+
     /// <summary>
     /// Picks the practice accounts saved in the database back up, once, so restarting the API
     /// (or running a second one) doesn't mark them disconnected.
@@ -121,8 +128,28 @@ public sealed class PracticeMessagingProvider(MessagingSettings settings, TimePr
         return Task.FromResult(new SentItem($"practice-sent-{Guid.NewGuid():N}", threadId));
     }
 
-    public Task<string> ResolveProfileIdAsync(string accountExternalId, string publicIdentifier, CancellationToken ct) =>
-        Task.FromResult(ProfilePrefix + publicIdentifier);
+    /// <summary>A pretend profile with no picture, so the initials fallback can be tried too.</summary>
+    public Task<LinkedInPerson> GetProfileAsync(string accountExternalId, string identifier, bool withBackground, CancellationToken ct)
+    {
+        var providerId = identifier.StartsWith(ProfilePrefix, StringComparison.Ordinal) ? identifier : ProfilePrefix + identifier;
+        var background = new LinkedInBackground(
+            "A practice profile. Connect a real LinkedIn account to see real ones.",
+            Followers: 1200,
+            Connections: 500,
+            SharedConnections: 3,
+            [new LinkedInRole("Partner", "Practice Ventures", null, new DateOnly(2021, 1, 1), null, null)],
+            [new LinkedInSchool("Practice University", "MBA", null, new DateOnly(2012, 9, 1), new DateOnly(2014, 6, 1))]);
+
+        return Task.FromResult(new LinkedInPerson(
+            providerId,
+            "Partner at Practice Ventures",
+            "Toronto, Ontario, Canada",
+            PictureUrl: null,
+            LinkedInDegree.Second,
+            IsOpenProfile: false,
+            IsPremium: true,
+            withBackground ? background : null));
+    }
 
     /// <summary>Every connection request is accepted a little later, so waiting for acceptance can be tried.</summary>
     public Task SendInvitationAsync(string accountExternalId, string profileId, string? note, CancellationToken ct)

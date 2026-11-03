@@ -1,0 +1,195 @@
+.panel {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  list-style: none;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+}
+
+.invitations {
+  background: var(--brand);
+}
+
+.messages {
+  background: var(--linkedin);
+}
+
+.emails {
+  background: var(--email);
+}
+
+.replySwatch {
+  border-radius: 999px;
+  background: var(--star);
+}
+
+/* The headline numbers in a row, divided by hairlines rather than boxed. */
+.totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--space-3) 0;
+  margin: 0;
+}
+
+.totals > div {
+  padding: 0 var(--space-4);
+  border-left: 1px solid var(--border);
+}
+
+.totals > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.totals dt {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.totals dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.of {
+  color: var(--muted-foreground);
+  font-size: var(--text-base);
+  font-weight: 400;
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: var(--space-2);
+  height: 10rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/*
+ * Each day is a track as tall as the daily limit. Segments stack from the bottom; the reply dot
+ * (order 1) sits on top of them.
+ */
+.bar {
+  display: flex;
+  flex: 1;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  width: 100%;
+  max-width: 2.5rem;
+  min-height: 0;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--muted);
+}
+
+.segment {
+  flex-shrink: 0;
+}
+
+.replyDot {
+  order: 1;
+  flex-shrink: 0;
+  align-self: center;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  margin: var(--space-1) 0;
+  border-radius: 999px;
+  background: var(--star);
+}
+
+.dayLabel {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.note {
+  margin: calc(-1 * var(--space-2)) 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 639px) {
+  /* Two totals per row, without the dividers, which would start the wrapped rows. */
+  .totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .totals > div {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .chart {
+    gap: 3px;
+  }
+
+  /* Every other date, so the numbers don't crowd. */
+  .day:nth-child(even):not(:last-child) .dayLabel {
+    visibility: hidden;
+  }
+}

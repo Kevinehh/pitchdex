@@ -1239,6 +1239,70 @@ export interface paths {
         };
         trace?: never;
     };
+    "/api/leads/{id}/linkedin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LinkedInProfileDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Bad Gateway */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/leads/from-investor": {
         parameters: {
             query?: never;
@@ -1301,6 +1365,88 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MeetingDto"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meetings/upcoming": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MeetingDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1609,6 +1755,213 @@ export interface paths {
             };
         };
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/calendly": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendlySettingsDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/calendly/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateCalendlyLinkCommand"];
+                    "text/json": components["schemas"]["UpdateCalendlyLinkCommand"];
+                    "application/*+json": components["schemas"]["UpdateCalendlyLinkCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendlySettingsDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/calendly/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConnectCalendlyCommand"];
+                    "text/json": components["schemas"]["ConnectCalendlyCommand"];
+                    "application/*+json": components["schemas"]["ConnectCalendlyCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendlySettingsDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Bad Gateway */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendlySettingsDto"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/calendly/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendlyCheckDto"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -2031,6 +2384,29 @@ export interface components {
         };
         /** @enum {unknown} */
         ActivityKind: "EmailSent" | "InvitationSent" | "LinkedInMessageSent" | "EmailReply" | "LinkedInReply" | "InvitationAccepted" | "StepFailed";
+        CalendlyAccountDto: {
+            name: string;
+            email: string;
+            /** Format: date-time */
+            connectedAt: string;
+            /** Format: date-time */
+            syncedAt: null | string;
+            lastError: null | string;
+        };
+        CalendlyCheckDto: {
+            settings: components["schemas"]["CalendlySettingsDto"];
+            /** Format: int32 */
+            eventsFound: number;
+            /** Format: int32 */
+            booked: number;
+            /** Format: int32 */
+            canceled: number;
+            unmatchedEmails: string[];
+        };
+        CalendlySettingsDto: {
+            link: null | string;
+            account: null | components["schemas"]["CalendlyAccountDto"];
+        };
         CampaignDto: {
             /** Format: uuid */
             id: string;
@@ -2096,6 +2472,9 @@ export interface components {
             /** Format: int64 */
             max: null | number;
         };
+        ConnectCalendlyCommand: {
+            accessToken: string;
+        };
         ConnectLinkDto: {
             url: string;
         };
@@ -2114,6 +2493,7 @@ export interface components {
             unreadCount: number;
             messages: components["schemas"]["MessageDto"][];
             campaigns: components["schemas"]["LeadCampaignDto"][];
+            meetings: components["schemas"]["MeetingDto"][];
             reply: components["schemas"]["ReplyOptionsDto"];
         };
         ConversationLeadDto: {
@@ -2128,12 +2508,14 @@ export interface components {
             title: null | string;
             location: null | string;
             website: null | string;
+            linkedIn: null | components["schemas"]["LeadLinkedInDto"];
         };
         ConversationSummaryDto: {
             /** Format: uuid */
             leadId: string;
             leadName: string;
             leadFirm: null | string;
+            leadPictureUrl: null | string;
             leadStatus: components["schemas"]["LeadStatus"];
             lastKind: components["schemas"]["MessageKind"];
             lastDirection: components["schemas"]["MessageDirection"];
@@ -2168,8 +2550,22 @@ export interface components {
             /** Format: int32 */
             sentLast24Hours: number;
         };
+        DailySends: {
+            /** Format: date */
+            day: string;
+            /** Format: int32 */
+            invitations: number;
+            /** Format: int32 */
+            linkedInMessages: number;
+            /** Format: int32 */
+            emails: number;
+            /** Format: int32 */
+            replies: number;
+        };
         DashboardDto: {
             sending: components["schemas"]["SendingStat"][];
+            days: components["schemas"]["DailySends"][];
+            pipeline: components["schemas"]["PipelineStage"][];
             /** Format: int32 */
             unreadConversations: number;
             /** Format: int32 */
@@ -2290,9 +2686,18 @@ export interface components {
             isStarred: boolean;
             /** Format: uuid */
             investorId: null | string;
+            linkedIn: null | components["schemas"]["LeadLinkedInDto"];
             campaigns: components["schemas"]["LeadCampaignDto"][];
             /** Format: date-time */
             updatedAt: string;
+        };
+        LeadLinkedInDto: {
+            pictureUrl: null | string;
+            headline: null | string;
+            location: null | string;
+            degree: null | components["schemas"]["LinkedInDegree"];
+            isOpenProfile: boolean;
+            isPremium: boolean;
         };
         /** @enum {unknown} */
         LeadSort: "Updated" | "Name" | "Firm" | "Email" | "Status";
@@ -2305,6 +2710,58 @@ export interface components {
         };
         /** @enum {unknown} */
         LinkedInAction: "Invitation" | "Message";
+        /** @enum {unknown} */
+        LinkedInDegree: "First" | "Second" | "Third" | "OutOfNetwork" | null;
+        LinkedInProfileDto: {
+            summary: components["schemas"]["LeadLinkedInDto"];
+            about: null | string;
+            /** Format: int32 */
+            followers: null | number;
+            /** Format: int32 */
+            connections: null | number;
+            /** Format: int32 */
+            sharedConnections: null | number;
+            experience: components["schemas"]["LinkedInRole"][];
+            education: components["schemas"]["LinkedInSchool"][];
+        };
+        LinkedInRole: {
+            position: string;
+            company: null | string;
+            logoUrl: null | string;
+            /** Format: date */
+            start: null | string;
+            /** Format: date */
+            end: null | string;
+            description: null | string;
+        };
+        LinkedInSchool: {
+            school: string;
+            degree: null | string;
+            logoUrl: null | string;
+            /** Format: date */
+            start: null | string;
+            /** Format: date */
+            end: null | string;
+        };
+        MeetingDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            leadId: null | string;
+            name: string;
+            email: string;
+            firm: null | string;
+            pictureUrl: null | string;
+            title: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: string;
+            joinUrl: null | string;
+            status: components["schemas"]["MeetingStatus"];
+        };
+        /** @enum {unknown} */
+        MeetingStatus: "Scheduled" | "Canceled";
         /** @enum {unknown} */
         MessageDirection: "Outbound" | "Inbound";
         MessageDto: {
@@ -2372,6 +2829,11 @@ export interface components {
             /** Format: int32 */
             pageSize: number;
         };
+        PipelineStage: {
+            status: components["schemas"]["LeadStatus"];
+            /** Format: int32 */
+            count: number;
+        };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -2390,6 +2852,7 @@ export interface components {
             canLinkedIn: boolean;
             defaultChannel: components["schemas"]["AccountChannel"];
             emailSubject: null | string;
+            calendlyUrl: null | string;
         };
         ReplyStats: {
             /** Format: int32 */
@@ -2483,6 +2946,9 @@ export interface components {
         StepType: "Email" | "LinkedInInvitation" | "LinkedInMessage";
         UpdateAccountLimitsCommand: {
             limits: components["schemas"]["LimitInput"][];
+        };
+        UpdateCalendlyLinkCommand: {
+            link: null | string;
         };
         UpdateCampaignCommand: {
             /** Format: uuid */

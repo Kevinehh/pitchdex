@@ -1,0 +1,22 @@
+.mark {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.4rem;
+  background: linear-gradient(135deg, #3b74f6, #1c45c4);
+  box-shadow: 0 4px 10px -3px rgb(59 116 246 / 55%);
+  color: #fff;
+}
+
+.mark svg {
+  width: 62%;
+  height: 62%;
+}
+
+.lg {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+}

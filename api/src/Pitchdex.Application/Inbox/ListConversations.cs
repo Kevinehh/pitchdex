@@ -73,6 +73,7 @@ public sealed class ListConversationsHandler(IAppDbContext db)
                 r.Lead.Id,
                 r.Lead.FullName,
                 r.Lead.Firm,
+                r.Lead.LinkedIn?.PictureUrl,
                 r.Lead.Status,
                 r.Last.Kind,
                 r.Last.Direction,

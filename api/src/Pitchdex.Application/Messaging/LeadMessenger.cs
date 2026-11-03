@@ -1,5 +1,6 @@
 using Pitchdex.Application.Common;
 using Pitchdex.Application.Integrations;
+using Pitchdex.Application.Leads;
 using Pitchdex.Domain.Accounts;
 using Pitchdex.Domain.Campaigns;
 using Pitchdex.Domain.Leads;
@@ -55,17 +56,25 @@ public sealed class LeadMessenger(
 
         var message = await StartAsync(lead, account, kind, text, source, ct);
 
-        // Looked up once per lead, then reused for every later step.
-        lead.LinkedInProviderId ??= await linkedIn.ResolveProfileIdAsync(account.ExternalId, publicIdentifier, ct);
-        message.CounterpartIdentifier = lead.LinkedInProviderId;
+        // Looked up once per lead, then reused for every later step. The lookup also brings
+        // their picture and headline, so they're saved too.
+        var profileId = lead.LinkedInProviderId;
+        if (profileId is null)
+        {
+            var person = await linkedIn.GetProfileAsync(account.ExternalId, publicIdentifier, withBackground: false, ct);
+            LinkedInProfiles.Apply(lead, person, clock.GetUtcNow());
+            profileId = person.ProviderId;
+        }
+
+        message.CounterpartIdentifier = profileId;
 
         if (kind == MessageKind.LinkedInInvitation)
         {
-            await linkedIn.SendInvitationAsync(account.ExternalId, lead.LinkedInProviderId, text.Length > 0 ? text : null, ct);
+            await linkedIn.SendInvitationAsync(account.ExternalId, profileId, text.Length > 0 ? text : null, ct);
             return Finish(message, lead, new SentItem(null, null));
         }
 
-        var sent = await linkedIn.SendMessageAsync(account.ExternalId, lead.LinkedInProviderId, text, ct);
+        var sent = await linkedIn.SendMessageAsync(account.ExternalId, profileId, text, ct);
         return Finish(message, lead, sent);
     }
 

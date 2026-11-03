@@ -38,6 +38,18 @@
   padding: 0 var(--space-5) var(--space-3);
 }
 
+/* Fills what's left of the panel's height and scrolls, without a scrollbar showing. */
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
 /* A divided list of rows, used by most dashboard panels. */
 .list {
   margin: 0;

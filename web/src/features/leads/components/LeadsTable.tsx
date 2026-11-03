@@ -1,6 +1,7 @@
 import type { UseQueryResult } from "@tanstack/react-query"
 import { Send, Star, Users } from "lucide-react"
 import { Link } from "react-router"
+import { Avatar } from "@/components/common/Avatar"
 import { EmptyState } from "@/components/common/EmptyState"
 import { Pagination } from "@/components/common/Pagination"
 import { SortableHeader } from "@/components/common/SortableHeader"
@@ -143,7 +144,14 @@ export function LeadsTable({
               </TableCell>
               <TableCell>
                 <div className={styles.nameCell}>
-                  <span className={styles.name}>{lead.fullName}</span>
+                  <Avatar
+                    name={lead.fullName}
+                    src={lead.linkedIn?.pictureUrl}
+                    className={styles.avatar}
+                  />
+                  <span className={styles.name} title={lead.linkedIn?.headline ?? undefined}>
+                    {lead.fullName}
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon-xs"

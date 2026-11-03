@@ -1,0 +1,75 @@
+.stages {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-1) 0 var(--space-2);
+  list-style: none;
+}
+
+.new {
+  --tone: var(--muted-foreground);
+}
+
+.contacted {
+  --tone: var(--brand);
+}
+
+.replied {
+  --tone: var(--email);
+}
+
+.meeting {
+  --tone: var(--meeting);
+}
+
+.passed {
+  --tone: var(--input);
+}
+
+/* The whole row is the link; it reaches into the panel's padding so the hover fills the width. */
+.stage {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) 2rem;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.25rem;
+  margin: 0 calc(-1 * var(--space-2));
+  padding: 0 var(--space-2);
+  border-radius: calc(var(--radius) - 2px);
+  color: inherit;
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.stage:hover {
+  background: var(--accent);
+}
+
+.stage:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.label {
+  color: var(--muted-foreground);
+}
+
+.track {
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tone);
+}
+
+.count {
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

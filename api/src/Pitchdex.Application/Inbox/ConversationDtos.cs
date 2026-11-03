@@ -1,4 +1,5 @@
 using Pitchdex.Application.Leads;
+using Pitchdex.Application.Meetings;
 using Pitchdex.Domain.Accounts;
 using Pitchdex.Domain.Leads;
 using Pitchdex.Domain.Messages;
@@ -21,6 +22,7 @@ public sealed record ConversationSummaryDto(
     Guid LeadId,
     string LeadName,
     string? LeadFirm,
+    string? LeadPictureUrl,
     LeadStatus LeadStatus,
     MessageKind LastKind,
     MessageDirection LastDirection,
@@ -34,15 +36,20 @@ public sealed record ConversationSummaryDto(
 public sealed record ConversationCounts(int Unread, int Starred, int Archived);
 
 /// <summary>A whole conversation, with what the side panel shows about the lead.</summary>
+/// <param name="Meetings">Calls the lead booked on the founder's Calendly, newest first.</param>
 public sealed record ConversationDto(
     ConversationLeadDto Lead,
     bool IsArchived,
     int UnreadCount,
     IReadOnlyList<MessageDto> Messages,
     IReadOnlyList<LeadCampaignDto> Campaigns,
+    IReadOnlyList<MeetingDto> Meetings,
     ReplyOptionsDto Reply);
 
-/// <summary>The lead, plus what's known about them from Explore when they were saved from there.</summary>
+/// <summary>
+/// The lead, plus what's known about them from Explore when they were saved from there, and
+/// from LinkedIn once their profile has been looked up.
+/// </summary>
 public sealed record ConversationLeadDto(
     Guid Id,
     string FullName,
@@ -53,7 +60,14 @@ public sealed record ConversationLeadDto(
     bool IsStarred,
     string? Title,
     string? Location,
-    string? Website);
+    string? Website,
+    LeadLinkedInDto? LinkedIn);
 
 /// <param name="DefaultChannel">The channel the lead last wrote on, so a reply goes back the same way.</param>
-public sealed record ReplyOptionsDto(bool CanEmail, bool CanLinkedIn, AccountChannel DefaultChannel, string? EmailSubject);
+/// <param name="CalendlyUrl">The founder's booking link, to drop into a reply. Empty when none is set.</param>
+public sealed record ReplyOptionsDto(
+    bool CanEmail,
+    bool CanLinkedIn,
+    AccountChannel DefaultChannel,
+    string? EmailSubject,
+    string? CalendlyUrl);

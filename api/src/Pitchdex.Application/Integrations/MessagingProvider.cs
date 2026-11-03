@@ -1,4 +1,5 @@
 using Pitchdex.Domain.Accounts;
+using Pitchdex.Domain.Leads;
 using Pitchdex.Domain.Messages;
 
 namespace Pitchdex.Application.Integrations;
@@ -35,6 +36,9 @@ public interface IAccountProvider
 
     /// <summary>One account, or empty if the provider doesn't have it.</summary>
     Task<ProviderAccount?> GetAccountAsync(string externalId, CancellationToken ct);
+
+    /// <summary>Unlinks an account at the provider, so it stops syncing and stops being billed.</summary>
+    Task RemoveAccountAsync(string externalId, CancellationToken ct);
 }
 
 /// <param name="IdempotencyKey">Stops a retried request from sending twice.</param>
@@ -58,8 +62,12 @@ public interface IEmailChannel
 
 public interface ILinkedInChannel
 {
-    /// <summary>The provider's id for the person behind a profile link, needed for every action.</summary>
-    Task<string> ResolveProfileIdAsync(string accountExternalId, string publicIdentifier, CancellationToken ct);
+    /// <summary>
+    /// A person's profile, by the part of their link after /in/ or by the provider's id for them.
+    /// Each lookup counts as a LinkedIn profile view. <paramref name="withBackground"/> adds their
+    /// work history, education and About section, which costs LinkedIn a few more requests.
+    /// </summary>
+    Task<LinkedInPerson> GetProfileAsync(string accountExternalId, string identifier, bool withBackground, CancellationToken ct);
 
     Task SendInvitationAsync(string accountExternalId, string profileId, string? note, CancellationToken ct);
 
@@ -77,6 +85,34 @@ public interface ILinkedInChannel
 /// <param name="ProviderId">The provider's id for the person, the same id messages and invitations use.</param>
 /// <param name="PublicIdentifier">The part of their profile link after /in/.</param>
 public sealed record LinkedInConnection(string ProviderId, string? PublicIdentifier);
+
+/// <summary>A LinkedIn profile as the provider reports it.</summary>
+/// <param name="ProviderId">The provider's id for the person, needed for every action.</param>
+/// <param name="Degree">How close they are to the account that looked them up.</param>
+/// <param name="Background">Only when asked for.</param>
+public sealed record LinkedInPerson(
+    string ProviderId,
+    string? Headline,
+    string? Location,
+    string? PictureUrl,
+    LinkedInDegree? Degree,
+    bool IsOpenProfile,
+    bool IsPremium,
+    LinkedInBackground? Background = null);
+
+/// <summary>The longer part of a profile, shown when a founder opens a lead.</summary>
+public sealed record LinkedInBackground(
+    string? About,
+    int? Followers,
+    int? Connections,
+    int? SharedConnections,
+    IReadOnlyList<LinkedInRole> Experience,
+    IReadOnlyList<LinkedInSchool> Education);
+
+/// <param name="End">Empty while they're still in the role.</param>
+public sealed record LinkedInRole(string Position, string? Company, string? LogoUrl, DateOnly? Start, DateOnly? End, string? Description);
+
+public sealed record LinkedInSchool(string School, string? Degree, string? LogoUrl, DateOnly? Start, DateOnly? End);
 
 /// <summary>A message the provider has, sent or received, for the inbox sync to store.</summary>
 /// <param name="CounterpartIdentifier">The other person: an email address, or a LinkedIn profile id.</param>

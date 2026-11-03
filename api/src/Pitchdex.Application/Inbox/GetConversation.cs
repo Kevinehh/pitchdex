@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Pitchdex.Application.Common;
 using Pitchdex.Application.Leads;
+using Pitchdex.Application.Meetings;
 using Pitchdex.Domain.Accounts;
 using Pitchdex.Domain.Messages;
 
 namespace Pitchdex.Application.Inbox;
 
-/// <summary>Everything the Inbox shows for one lead: the messages, who they are, and their campaigns.</summary>
-public sealed class GetConversationHandler(IAppDbContext db)
+/// <summary>Everything the Inbox shows for one lead: the messages, who they are, their campaigns and meetings.</summary>
+public sealed class GetConversationHandler(IAppDbContext db, WorkspaceContext workspace)
 {
     /// <summary>Older messages than this aren't shown. Plenty for an investor conversation.</summary>
     private const int MaxMessages = 200;
@@ -56,6 +57,11 @@ public sealed class GetConversationHandler(IAppDbContext db)
             .Distinct()
             .ToListAsync(ct);
 
+        var calendlyUrl = await db.Workspaces
+            .Where(w => w.Id == workspace.RequiredId)
+            .Select(w => w.CalendlyUrl)
+            .FirstOrDefaultAsync(ct);
+
         var location = investor is null
             ? null
             : string.Join(", ", new[] { investor.City, investor.Region, investor.Country }.Where(p => !string.IsNullOrWhiteSpace(p)));
@@ -71,17 +77,20 @@ public sealed class GetConversationHandler(IAppDbContext db)
                 lead.IsStarred,
                 investor?.Title,
                 string.IsNullOrEmpty(location) ? null : location,
-                investor?.FirmDomain),
+                investor?.FirmDomain,
+                LeadDto.LinkedInOf(lead.LinkedIn)),
             lead.ArchivedAt != null,
             await db.Messages.CountAsync(m =>
                 m.LeadId == leadId && m.Direction == MessageDirection.Inbound && m.ReadAt == null, ct),
             messages,
             campaigns,
+            await MeetingQueries.ForLeadAsync(db, leadId, ct),
             new ReplyOptionsDto(
                 CanEmail: connected.Contains(AccountChannel.Email),
                 CanLinkedIn: connected.Contains(AccountChannel.LinkedIn) && lead.LinkedInUrl is not null,
                 DefaultChannel: DefaultChannel(messages),
-                EmailSubject: ReplySubject.For(messages.LastOrDefault(m => m.Kind == MessageKind.Email)?.Subject)));
+                EmailSubject: ReplySubject.For(messages.LastOrDefault(m => m.Kind == MessageKind.Email)?.Subject),
+                CalendlyUrl: calendlyUrl));
     }
 
     /// <summary>The channel the lead last wrote on; failing that, the one last used; failing that, email.</summary>

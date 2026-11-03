@@ -634,6 +634,10 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_starred");
 
+                    b.Property<DateTimeOffset?>("LinkedInCheckedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("linkedin_checked_at");
+
                     b.Property<string>("LinkedInProviderId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -678,6 +682,96 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_leads_workspace_id_investor_id");
 
                     b.ToTable("leads", (string)null);
+                });
+
+            modelBuilder.Entity("Pitchdex.Domain.Meetings.Meeting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ends_at");
+
+                    b.Property<string>("EventUri")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("event_uri");
+
+                    b.Property<string>("InviteeEmail")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("invitee_email");
+
+                    b.Property<string>("InviteeName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("invitee_name");
+
+                    b.Property<string>("InviteeUri")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("invitee_uri");
+
+                    b.Property<string>("JoinUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("join_url");
+
+                    b.Property<Guid?>("LeadId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lead_id");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("starts_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workspace_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_meetings");
+
+                    b.HasIndex("EventUri")
+                        .HasDatabaseName("ix_meetings_event_uri");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("ix_meetings_workspace_id");
+
+                    b.HasIndex("LeadId", "StartsAt")
+                        .HasDatabaseName("ix_meetings_lead_id_starts_at");
+
+                    b.HasIndex("WorkspaceId", "InviteeUri")
+                        .IsUnique()
+                        .HasDatabaseName("ix_meetings_workspace_id_invitee_uri");
+
+                    b.ToTable("meetings", (string)null);
                 });
 
             modelBuilder.Entity("Pitchdex.Domain.Messages.Message", b =>
@@ -797,6 +891,11 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<string>("CalendlyUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("calendly_url");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1103,6 +1202,71 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_leads_workspaces_workspace_id");
+
+                    b.OwnsOne("Pitchdex.Domain.Leads.LinkedInSnapshot", "LinkedIn", b1 =>
+                        {
+                            b1.Property<Guid>("LeadId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Degree")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("linkedin_degree");
+
+                            b1.Property<DateTimeOffset>("FetchedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("linkedin_fetched_at");
+
+                            b1.Property<string>("Headline")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("linkedin_headline");
+
+                            b1.Property<bool>("IsOpenProfile")
+                                .HasColumnType("boolean")
+                                .HasColumnName("linkedin_open_profile");
+
+                            b1.Property<bool>("IsPremium")
+                                .HasColumnType("boolean")
+                                .HasColumnName("linkedin_premium");
+
+                            b1.Property<string>("Location")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("linkedin_location");
+
+                            b1.Property<string>("PictureUrl")
+                                .HasMaxLength(1000)
+                                .HasColumnType("character varying(1000)")
+                                .HasColumnName("linkedin_picture_url");
+
+                            b1.HasKey("LeadId");
+
+                            b1.ToTable("leads");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LeadId")
+                                .HasConstraintName("fk_leads_leads_id");
+                        });
+
+                    b.Navigation("LinkedIn");
+                });
+
+            modelBuilder.Entity("Pitchdex.Domain.Meetings.Meeting", b =>
+                {
+                    b.HasOne("Pitchdex.Domain.Leads.Lead", null)
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_meetings_leads_lead_id");
+
+                    b.HasOne("Pitchdex.Domain.Workspaces.Workspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_meetings_workspaces_workspace_id");
                 });
 
             modelBuilder.Entity("Pitchdex.Domain.Messages.Message", b =>
@@ -1138,6 +1302,62 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_messages_workspaces_workspace_id");
+                });
+
+            modelBuilder.Entity("Pitchdex.Domain.Workspaces.Workspace", b =>
+                {
+                    b.OwnsOne("Pitchdex.Domain.Workspaces.CalendlyConnection", "Calendly", b1 =>
+                        {
+                            b1.Property<Guid>("WorkspaceId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTimeOffset>("ConnectedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("calendly_connected_at");
+
+                            b1.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(320)
+                                .HasColumnType("character varying(320)")
+                                .HasColumnName("calendly_email");
+
+                            b1.Property<string>("LastError")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("calendly_last_error");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("calendly_name");
+
+                            b1.Property<string>("ProtectedToken")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("calendly_token");
+
+                            b1.Property<DateTimeOffset?>("SyncedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("calendly_synced_at");
+
+                            b1.Property<string>("UserUri")
+                                .IsRequired()
+                                .HasMaxLength(300)
+                                .HasColumnType("character varying(300)")
+                                .HasColumnName("calendly_user_uri");
+
+                            b1.HasKey("WorkspaceId");
+
+                            b1.ToTable("workspaces");
+
+                            b1.WithOwner()
+                                .HasForeignKey("WorkspaceId")
+                                .HasConstraintName("fk_workspaces_workspaces_id");
+                        });
+
+                    b.Navigation("Calendly");
                 });
 
             modelBuilder.Entity("Pitchdex.Domain.Workspaces.WorkspaceMember", b =>

@@ -1,0 +1,314 @@
+.section {
+  border-top: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line-2);
+  background: var(--bg-soft);
+}
+
+/* minmax(0, …) lets columns shrink below their content, so a wide table can't push the page sideways. */
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 64px;
+}
+
+.feature + .feature {
+  margin-top: 96px;
+}
+
+.reversed .copy {
+  order: 2;
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--blue-600);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.number::after {
+  content: "";
+  width: 48px;
+  height: 1px;
+  background: var(--blue-200);
+}
+
+.copy h3 {
+  margin-bottom: 16px;
+  font-size: clamp(26px, 3vw, 36px);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.copy p {
+  margin-bottom: 22px;
+  color: var(--ink-2);
+  font-size: 17px;
+}
+
+.panel {
+  position: relative;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.panelHead b {
+  font-size: 14px;
+}
+
+.panelHead span {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.chipOn {
+  border-color: var(--blue-200);
+  background: var(--blue-50);
+  color: var(--blue-700);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line-2);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--line-2);
+  color: var(--ink-2);
+}
+
+.table td:first-child {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.fit {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--blue-50);
+  color: var(--blue-700);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.sequence {
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 16px;
+}
+
+.step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 34px;
+  bottom: 0;
+  left: 15px;
+  width: 1px;
+  background: var(--line);
+}
+
+.stepNumber {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.stepDone .stepNumber {
+  border-color: var(--blue-600);
+  background: var(--blue-600);
+  color: #fff;
+}
+
+.stepBox {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--bg-soft);
+}
+
+.stepTitle {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stepTitle span {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.stepBox p {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.stepBox mark {
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--blue-100);
+  color: var(--blue-900);
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.day {
+  padding-bottom: 4px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-align: center;
+}
+
+.slot {
+  height: 44px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--bg-soft);
+}
+
+.meeting,
+.meetingLight {
+  padding: 6px 8px;
+  border: 0;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.meeting b,
+.meetingLight b {
+  display: block;
+  font-size: 11.5px;
+}
+
+.meeting {
+  background: var(--blue-600);
+  color: #fff;
+}
+
+.meetingLight {
+  background: var(--blue-100);
+  color: var(--blue-900);
+}
+
+.toast {
+  position: absolute;
+  right: -18px;
+  bottom: -22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+}
+
+.toastIcon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+@media (max-width: 960px) {
+  .feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .reversed .copy {
+    order: 0;
+  }
+
+  .toast {
+    right: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
+}

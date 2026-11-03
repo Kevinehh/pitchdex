@@ -1,35 +1,44 @@
+import { useState } from "react"
 import { Link } from "react-router"
 import { EmptyState } from "@/components/common/EmptyState"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CampaignsTable, NewCampaignDialog } from "@/features/campaigns"
+import { NeedsYou } from "@/features/dashboard/components/NeedsYou"
+import { Pipeline } from "@/features/dashboard/components/Pipeline"
 import { RecentActivity } from "@/features/dashboard/components/RecentActivity"
-import { RecentReplies } from "@/features/dashboard/components/RecentReplies"
-import { SetupChecklist } from "@/features/dashboard/components/SetupChecklist"
-import { Statistics } from "@/features/dashboard/components/Statistics"
+import { SendingChart } from "@/features/dashboard/components/SendingChart"
+import { ThisWeek } from "@/features/dashboard/components/ThisWeek"
 import { useSession } from "@/features/auth"
 import { useDashboard } from "@/features/dashboard/hooks/useDashboard"
 import styles from "./DashboardPage.module.css"
 
-function greeting(now = new Date()) {
+const dateFormat = new Intl.DateTimeFormat(undefined, {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+})
+
+function greeting(now: Date) {
   const hour = now.getHours()
   if (hour < 12) return "Good morning"
   if (hour < 18) return "Good afternoon"
   return "Good evening"
 }
 
-/** Home after sign-in: how sending is going, what happened, and how each campaign is doing. */
+/** Home after sign-in: what needs the founder, where leads stand, the week's calls, sending, campaigns. */
 export default function DashboardPage() {
   const dashboard = useDashboard()
   const firstName = useSession().data?.user.firstName
+  const [now] = useState(() => new Date())
 
   if (dashboard.isPending) {
     return (
       <div className={styles.loading} aria-busy="true">
         <PageHeader title="Dashboard" />
-        <Skeleton className={styles.loadingTop} />
-        <Skeleton className={styles.loadingCampaigns} />
+        <Skeleton className={styles.loadingCards} />
+        <Skeleton className={styles.loadingChart} />
       </div>
     )
   }
@@ -49,46 +58,48 @@ export default function DashboardPage() {
   }
 
   const summary = dashboard.data
-  const running = summary.activeCampaigns
 
   return (
     <>
       <PageHeader
-        title={firstName ? `${greeting()}, ${firstName}` : greeting()}
-        description={`${running} ${running === 1 ? "campaign" : "campaigns"} running · ${summary.unreadConversations} unread`}
+        title={firstName ? `${greeting(now)}, ${firstName}` : greeting(now)}
+        description={dateFormat.format(now)}
         actions={<NewCampaignDialog />}
       />
 
-      <div className={styles.top}>
-        <Statistics
-          sending={summary.sending}
-          replies={summary.replies}
-          unreadConversations={summary.unreadConversations}
-          pendingInvitations={summary.pendingInvitations}
-        />
-        <RecentActivity activity={summary.activity} />
-      </div>
+      <div className={styles.page}>
+        <div className={styles.top}>
+          <NeedsYou setup={summary.setup} />
+          <Pipeline stages={summary.pipeline} />
+          <ThisWeek />
+        </div>
 
-      <section className={styles.campaigns} aria-labelledby="recent-campaigns">
-        <header className={styles.sectionHeader}>
-          <h2 id="recent-campaigns" className={styles.sectionTitle}>
-            Recent campaigns
-          </h2>
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={<Link to="/campaigns" />}
-          >
-            All campaigns
-          </Button>
-        </header>
-        <CampaignsTable limit={5} />
-      </section>
+        <div className={styles.overview}>
+          <SendingChart
+            days={summary.days}
+            sending={summary.sending}
+            replies={summary.replies}
+            pendingInvitations={summary.pendingInvitations}
+          />
+          <RecentActivity activity={summary.activity} className={styles.activity} />
+        </div>
 
-      <div className={styles.grid}>
-        <RecentReplies />
-        <SetupChecklist setup={summary.setup} />
+        <section aria-labelledby="campaigns-title">
+          <header className={styles.sectionHeader}>
+            <h2 id="campaigns-title" className={styles.sectionTitle}>
+              Campaigns
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link to="/campaigns" />}
+            >
+              All campaigns
+            </Button>
+          </header>
+          <CampaignsTable limit={5} />
+        </section>
       </div>
     </>
   )

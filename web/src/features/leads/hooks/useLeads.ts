@@ -3,10 +3,11 @@ import { api, unwrap } from "@/lib/api/client"
 import { queryKeys } from "@/lib/api/queryKeys"
 import type { LeadsQuery } from "../types"
 
-/** The only place that knows how leads are fetched. */
-export function useLeads(query: LeadsQuery) {
+/** The only place that knows how leads are fetched. `enabled: false` waits, such as for a search term. */
+export function useLeads(query: LeadsQuery, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [...queryKeys.leads, query],
+    enabled,
     queryFn: ({ signal }) => unwrap(api.GET("/api/leads", { params: { query }, signal })),
     // Keep the current page on screen while the next one loads.
     placeholderData: keepPreviousData,

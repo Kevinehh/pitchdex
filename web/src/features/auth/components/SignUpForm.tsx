@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router"
+import { Link, useLocation, useNavigate } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -9,13 +9,25 @@ import { MIN_PASSWORD, signUpSchema, type SignUpForm as SignUpValues } from "../
 import { showServerErrors } from "../serverErrors"
 import styles from "./AuthForm.module.css"
 
+/**
+ * What another page can hand to sign-up, such as the landing page's email box, so the email
+ * isn't typed twice. It travels in navigation state, which keeps it out of the URL.
+ */
+export type SignUpState = { email?: string }
+
 /** Creates the account and its workspace, signs in, and opens the dashboard. */
 export function SignUpForm() {
   const navigate = useNavigate()
+  const location = useLocation()
   const signUp = useSignUp()
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", password: "" },
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: (location.state as SignUpState | null)?.email ?? "",
+      password: "",
+    },
   })
   const { errors, isSubmitting } = form.formState
 
@@ -92,6 +104,18 @@ export function SignUpForm() {
       <Button type="submit" className={styles.submit} disabled={isSubmitting}>
         {isSubmitting ? "Creating your account…" : "Create account"}
       </Button>
+
+      <p className={styles.small}>
+        By creating an account, you agree to the{" "}
+        <Link to="/terms" target="_blank">
+          Terms &amp; Conditions
+        </Link>{" "}
+        and{" "}
+        <Link to="/privacy" target="_blank">
+          Privacy Policy
+        </Link>
+        .
+      </p>
 
       <p className={styles.small}>
         Already have an account? <Link to="/sign-in">Sign in</Link>

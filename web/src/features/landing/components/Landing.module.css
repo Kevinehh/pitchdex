@@ -1,0 +1,321 @@
+/*
+ * The landing page's look, shared by its sections. The marketing pages have their own palette
+ * and fonts, in a light and a dark set, so everything is scoped under .page and the app's theme
+ * is untouched. Sections take their colours from these tokens so both sets apply; only the
+ * always-navy blocks (the stat card, "Why cold email") keep fixed light-on-dark colours.
+ */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/inter-tight";
+@import "@fontsource-variable/jetbrains-mono";
+
+.page {
+  /* The 50–300 blues are tints behind blue text; 700 and 900 are that text. */
+  --blue-50: #eff5ff;
+  --blue-100: #dbe8ff;
+  --blue-200: #bcd4ff;
+  --blue-300: #8db6ff;
+  --blue-500: #3b74f6;
+  --blue-600: #2457e6;
+  --blue-700: #1c45c4;
+  --blue-900: #0f1f4d;
+  --button-hover: #1c45c4;
+  /* The deep blue behind the stat card and the "Why cold email" section. */
+  --navy: #0f1f4d;
+  --glow: 59 116 246;
+  --ink: #0b1020;
+  --ink-2: #3b4357;
+  --ink-3: #6b7387;
+  --ink-4: #9aa1b2;
+  --line: #e6e9f0;
+  --line-2: #eef1f6;
+  --bg: #ffffff;
+  --bg-soft: #f7f9fc;
+  --surface: #ffffff;
+  --nav-bg: rgb(255 255 255 / 82%);
+  --dot: #dfe3ea;
+  --green: #16a34a;
+  --green-soft: #e8f7ee;
+  --amber: #d97706;
+  --amber-soft: #fef4e6;
+  --violet: #6d28d9;
+  --violet-soft: #f1ecff;
+  --radius-lg: 16px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 4%), 0 8px 24px -8px rgb(16 24 40 / 8%);
+  --shadow-lg: 0 2px 4px rgb(16 24 40 / 4%), 0 30px 60px -20px rgb(36 87 230 / 25%);
+  --shadow-sm: 0 1px 3px rgb(16 24 40 / 10%);
+  --mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --display: "Inter Tight Variable", "Inter Variable", system-ui, sans-serif;
+
+  min-height: 100vh;
+  overflow-x: clip;
+  color-scheme: light;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter Variable", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tints are see-through, so they sit right on any of the dark surfaces. */
+.page[data-theme="dark"] {
+  --blue-50: rgb(77 132 255 / 12%);
+  --blue-100: rgb(77 132 255 / 20%);
+  --blue-200: rgb(77 132 255 / 34%);
+  --blue-300: #6f9bff;
+  --blue-500: #4d84ff;
+  --blue-600: #3f78ff;
+  --blue-700: #a3c0ff;
+  --blue-900: #dbe6ff;
+  --button-hover: #5a8bff;
+  --navy: #0c1631;
+  --ink: #eef1f8;
+  --ink-2: #b3bbcc;
+  --ink-3: #7f889c;
+  --ink-4: #5d6578;
+  --line: rgb(255 255 255 / 10%);
+  --line-2: rgb(255 255 255 / 6%);
+  --bg: #07090f;
+  --bg-soft: #0b0e16;
+  --surface: #10141e;
+  --nav-bg: rgb(7 9 15 / 78%);
+  --dot: rgb(255 255 255 / 14%);
+  --green: #4ade80;
+  --green-soft: rgb(74 222 128 / 12%);
+  --amber: #fbbf24;
+  --amber-soft: rgb(251 191 36 / 12%);
+  --violet: #c4b5fd;
+  --violet-soft: rgb(167 139 250 / 14%);
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -8px rgb(0 0 0 / 60%);
+  --shadow-lg: 0 2px 4px rgb(0 0 0 / 30%), 0 30px 60px -20px rgb(63 120 255 / 28%);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 50%);
+
+  color-scheme: dark;
+}
+
+/* Section links glide, and stop below the fixed nav. Overscroll matches the page, not the app. */
+:global(html):has(.page) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 76px;
+}
+
+:global(body):has(.page) {
+  background: #fff;
+}
+
+:global(body):has(.page[data-theme="dark"]) {
+  background: #07090f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html):has(.page) {
+    scroll-behavior: auto;
+  }
+}
+
+.page :is(h1, h2, h3) {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+}
+
+.page h2 {
+  font-size: clamp(32px, 4.6vw, 52px);
+}
+
+.page h3 {
+  font-size: 20px;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.wrap {
+  position: relative;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.pad {
+  position: relative;
+  padding: 120px 0;
+}
+
+.label {
+  color: var(--blue-600);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lead {
+  max-width: 620px;
+  color: var(--ink-2);
+  font-size: 18px;
+}
+
+.secHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 56px;
+  text-align: center;
+}
+
+.secHead .lead {
+  margin: 0 auto;
+}
+
+/* Corner brackets around a box, drawn by the box and one inner span. */
+.brackets {
+  position: relative;
+}
+
+.brackets::before,
+.brackets::after,
+.bracketsEnd::before,
+.bracketsEnd::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--bracket, var(--ink-3));
+  border-style: solid;
+  pointer-events: none;
+}
+
+.brackets::before {
+  top: 0;
+  left: 0;
+  border-width: 1px 0 0 1px;
+}
+
+.brackets::after {
+  top: 0;
+  right: 0;
+  border-width: 1px 1px 0 0;
+}
+
+.bracketsEnd::before {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 1px 1px;
+}
+
+.bracketsEnd::after {
+  right: 0;
+  bottom: 0;
+  border-width: 0 1px 1px 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.btnPrimary {
+  background: var(--blue-600);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 6px 16px -6px rgb(var(--glow) / 60%);
+}
+
+.btnPrimary:hover {
+  background: var(--button-hover);
+  transform: translateY(-1px);
+}
+
+.btnSmall {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.ticks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ticks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.ticks svg {
+  flex-shrink: 0;
+  color: var(--blue-600);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 22px;
+  border: 1px solid var(--blue-100);
+  border-radius: 10px;
+  background: var(--blue-50);
+  color: var(--blue-600);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logoMark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b74f6, #1c45c4);
+  box-shadow: 0 4px 10px -3px rgb(var(--glow) / 55%);
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    padding: 0 16px;
+  }
+
+  .pad {
+    padding: 80px 0;
+  }
+}

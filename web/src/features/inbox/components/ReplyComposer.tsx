@@ -1,5 +1,5 @@
-import { Mail, MessageSquare, Send } from "lucide-react"
-import { useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react"
+import { CalendarPlus, Mail, MessageSquare, Send } from "lucide-react"
+import { useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react"
 import { Link } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,7 @@ export function ReplyComposer({ lead, reply }: ReplyComposerProps) {
   )
   const [subject, setSubject] = useState(reply.emailSubject ?? "")
   const [body, setBody] = useState("")
+  const bodyElement = useRef<HTMLTextAreaElement>(null)
   const send = useReply(lead.id)
   const firstName = lead.fullName.split(" ")[0]
 
@@ -44,6 +45,23 @@ export function ReplyComposer({ lead, reply }: ReplyComposerProps) {
     ) : (
       `${lead.fullName} has no LinkedIn link, so you can't message them there.`
     ),
+  }
+
+  /** Puts the booking link where the cursor is, or at the end, with a space either side. */
+  function insertBookingLink() {
+    const link = reply.calendlyUrl
+    if (!link) return
+    const element = bodyElement.current
+    const start = element?.selectionStart ?? body.length
+    const end = element?.selectionEnd ?? start
+    const before = body.slice(0, start)
+    const after = body.slice(end)
+    const text = `${before && !/s$/.test(before) ? " " : ""}${link}${after && !/^s/.test(after) ? " " : ""}`
+    setBody(before + text + after)
+    requestAnimationFrame(() => {
+      element?.focus()
+      element?.setSelectionRange(start + text.length, start + text.length)
+    })
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -97,6 +115,17 @@ export function ReplyComposer({ lead, reply }: ReplyComposerProps) {
             </Button>
           ))}
         </div>
+        {reply.calendlyUrl && usable[channel] && (
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            onClick={insertBookingLink}
+            title={reply.calendlyUrl}
+          >
+            <CalendarPlus aria-hidden /> Booking link
+          </Button>
+        )}
         {channel === "Email" && usable.Email && (
           <Input
             value={subject}
@@ -111,6 +140,7 @@ export function ReplyComposer({ lead, reply }: ReplyComposerProps) {
       {usable[channel] ? (
         <div className={styles.composeRow}>
           <Textarea
+            ref={bodyElement}
             value={body}
             onChange={(event) => setBody(event.target.value)}
             onKeyDown={onKeyDown}

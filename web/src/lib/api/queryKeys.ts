@@ -4,6 +4,7 @@
  */
 export const queryKeys = {
   accounts: ["accounts"],
+  calendly: ["calendly"],
   session: ["session"],
   campaigns: ["campaigns"],
   dashboard: ["dashboard"],
@@ -12,5 +13,8 @@ export const queryKeys = {
   // Separate from "investors" so saving an investor doesn't refetch the filter lists.
   investorFilters: ["investor-filters"],
   leads: ["leads"],
+  // Separate from "leads": each fetch is a LinkedIn profile view, so lead changes mustn't refetch it.
+  linkedInProfiles: ["linkedin-profiles"],
+  meetings: ["meetings"],
   workingHours: ["working-hours"],
 } as const

@@ -122,7 +122,7 @@ export function ConversationList({
                     )}
                     aria-current={conversation.leadId === selectedId ? "page" : undefined}
                   >
-                    <Avatar name={conversation.leadName} />
+                    <Avatar name={conversation.leadName} src={conversation.leadPictureUrl} />
                     <span className={styles.text}>
                       <span className={styles.row}>
                         <span className={styles.name}>{conversation.leadName}</span>

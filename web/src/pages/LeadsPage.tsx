@@ -1,5 +1,6 @@
 import { Megaphone, Users, X } from "lucide-react"
 import { useState } from "react"
+import { useSearchParams } from "react-router"
 import { EmptyState } from "@/components/common/EmptyState"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Button } from "@/components/ui/button"
@@ -10,7 +11,7 @@ import {
   useCampaigns,
   useEnrollLeads,
 } from "@/features/campaigns"
-import { useUpdateLead } from "@/features/leads"
+import { LEAD_STATUSES, useUpdateLead } from "@/features/leads"
 import { ALL_CAMPAIGNS, NO_CAMPAIGN, type CampaignFilter } from "@/features/leads/campaignFilter"
 import { AddLeadDialog } from "@/features/leads/components/AddLeadDialog"
 import { LeadFilters } from "@/features/leads/components/LeadFilters"
@@ -34,7 +35,11 @@ const firstDirection = (column: LeadSort) => (column === "Updated" ? "Desc" : "A
  * filter picks which cards show. Ticked leads can be added to a campaign together.
  */
 export default function LeadsPage() {
-  const [status, setStatus] = useState<LeadStatus>()
+  const [params] = useSearchParams()
+  // The dashboard's pipeline links here with ?status=Replied and the like.
+  const [status, setStatus] = useState<LeadStatus | undefined>(() =>
+    LEAD_STATUSES.find((value) => value === params.get("status")),
+  )
   const [campaign, setCampaign] = useState<CampaignFilter>(ALL_CAMPAIGNS)
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState(DEFAULT_SORT)

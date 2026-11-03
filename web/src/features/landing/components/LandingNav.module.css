@@ -1,0 +1,83 @@
+.nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
+  border-bottom: 1px solid transparent;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.scrolled {
+  border-color: var(--line-2);
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+
+.links {
+  display: flex;
+  gap: 32px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.links a:hover {
+  color: var(--ink);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.themeToggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.themeToggle:hover {
+  border-color: var(--blue-200);
+  color: var(--ink);
+}
+
+.themeToggle:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.signIn {
+  padding: 0 10px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.signIn:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 960px) {
+  .links {
+    display: none;
+  }
+}

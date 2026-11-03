@@ -11,7 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AddToCampaignDialog, EnrollmentStatusBadge } from "@/features/campaigns"
-import { LEAD_STATUSES, useUpdateLead, type LeadStatus } from "@/features/leads"
+import { LEAD_STATUSES, LinkedInProfile, useUpdateLead, type LeadStatus } from "@/features/leads"
+import { LeadMeetings } from "@/features/meetings"
 import type { Conversation } from "../types"
 import styles from "./LeadPanel.module.css"
 
@@ -31,19 +32,22 @@ function safeUrl(value: string | null | undefined): string | undefined {
 /** Who the lead is, where they are in the pipeline, and the campaigns they're in. */
 export function LeadPanel({ conversation }: { conversation: Conversation }) {
   const id = useId()
-  const { lead, campaigns } = conversation
+  const { lead, campaigns, meetings } = conversation
   const updateLead = useUpdateLead()
   const [adding, setAdding] = useState(false)
   const linkedIn = safeUrl(lead.linkedInUrl)
   const website = safeUrl(lead.website)
+  const location = lead.linkedIn?.location ?? lead.location
 
   return (
     <aside className={styles.panel} aria-label={`About ${lead.fullName}`}>
       <div className={styles.identity}>
-        <Avatar name={lead.fullName} size="lg" />
+        <Avatar name={lead.fullName} src={lead.linkedIn?.pictureUrl} size="lg" />
         <div className={styles.who}>
           <h3 className={styles.name}>{lead.fullName}</h3>
-          {lead.title && <p className={styles.muted}>{lead.title}</p>}
+          {(lead.linkedIn?.headline ?? lead.title) && (
+            <p className={styles.muted}>{lead.linkedIn?.headline ?? lead.title}</p>
+          )}
           {lead.firm && <p>{lead.firm}</p>}
         </div>
       </div>
@@ -72,7 +76,10 @@ export function LeadPanel({ conversation }: { conversation: Conversation }) {
           </SelectContent>
         </Select>
         {(lead.status === "Replied" || lead.status === "Contacted") && (
-          <p className={styles.hint}>Booked a call? Set Meeting to stop any campaign steps.</p>
+          <p className={styles.hint}>
+            Booked a call? Set Meeting to stop any campaign steps. With Calendly connected in
+            Settings, bookings do this for you.
+          </p>
         )}
       </div>
 
@@ -96,10 +103,10 @@ export function LeadPanel({ conversation }: { conversation: Conversation }) {
             </dd>
           </div>
         )}
-        {lead.location && (
+        {location && (
           <div>
             <dt className={styles.label}>Location</dt>
-            <dd className={styles.value}>{lead.location}</dd>
+            <dd className={styles.value}>{location}</dd>
           </div>
         )}
         {website && (
@@ -113,6 +120,8 @@ export function LeadPanel({ conversation }: { conversation: Conversation }) {
           </div>
         )}
       </dl>
+
+      <LeadMeetings meetings={meetings} labelClassName={styles.label} />
 
       <section className={styles.campaigns} aria-labelledby={`${id}-campaigns`}>
         <h4 id={`${id}-campaigns`} className={styles.label}>
@@ -137,6 +146,8 @@ export function LeadPanel({ conversation }: { conversation: Conversation }) {
         </Button>
         <AddToCampaignDialog leadIds={[lead.id]} open={adding} onOpenChange={setAdding} />
       </section>
+
+      {linkedIn && <LinkedInProfile leadId={lead.id} />}
     </aside>
   )
 }

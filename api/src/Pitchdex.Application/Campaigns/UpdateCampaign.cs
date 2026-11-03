@@ -66,7 +66,7 @@ public sealed class UpdateCampaignValidator : AbstractValidator<UpdateCampaignCo
 /// Saves the editor. Steps are updated in place by position, so leads part-way through
 /// keep their place; extra steps are added and removed ones deleted.
 /// </summary>
-public sealed class UpdateCampaignHandler(IAppDbContext db, TimeProvider clock)
+public sealed class UpdateCampaignHandler(IAppDbContext db, WorkspaceContext workspace, TimeProvider clock)
 {
     public async Task<CampaignDto> Handle(UpdateCampaignCommand command, CancellationToken ct)
     {
@@ -74,6 +74,7 @@ public sealed class UpdateCampaignHandler(IAppDbContext db, TimeProvider clock)
 
         await CheckAccountAsync(command.EmailAccountId, AccountChannel.Email, ct);
         await CheckAccountAsync(command.LinkedInAccountId, AccountChannel.LinkedIn, ct);
+        await CheckCalendlyAsync(command, ct);
 
         campaign.Name = command.Name.Trim();
         campaign.EmailAccountId = command.EmailAccountId;
@@ -114,6 +115,16 @@ public sealed class UpdateCampaignHandler(IAppDbContext db, TimeProvider clock)
         campaign.Steps.Add(step);
         db.CampaignSteps.Add(step);
         return step;
+    }
+
+    /// <summary>Caught when the campaign is saved rather than when the step sends, so no lead is dropped over it.</summary>
+    private async Task CheckCalendlyAsync(UpdateCampaignCommand command, CancellationToken ct)
+    {
+        var usesCalendly = command.Steps.Any(s => MessageTemplate.UsesCalendly(s.Subject) || MessageTemplate.UsesCalendly(s.Body));
+        if (usesCalendly && !await db.Workspaces.AnyAsync(w => w.Id == workspace.RequiredId && w.CalendlyUrl != null, ct))
+        {
+            throw new UseCaseException(MessageTemplate.CalendlyMissing);
+        }
     }
 
     private async Task CheckAccountAsync(Guid? accountId, AccountChannel channel, CancellationToken ct)

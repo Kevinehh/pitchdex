@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Pitchdex.Application.Common;
 using Pitchdex.Application.Inbox;
+using Pitchdex.Application.Workspaces;
 using Pitchdex.Domain.Accounts;
 using Pitchdex.Domain.Campaigns;
+using Pitchdex.Domain.Leads;
 using Pitchdex.Domain.Messages;
 
 namespace Pitchdex.Application.Dashboard;
@@ -10,8 +12,12 @@ namespace Pitchdex.Application.Dashboard;
 /// <summary>Everything the dashboard shows, in one request.</summary>
 /// <param name="Sending">Sent in the last 24 hours against what the connected accounts allow.</param>
 /// <param name="PendingInvitations">Connection requests still waiting to be accepted.</param>
+/// <param name="Days">The last 14 days, oldest first, ending today.</param>
+/// <param name="Pipeline">How many leads are at each stage, every stage listed in order.</param>
 public sealed record DashboardDto(
     IReadOnlyList<SendingStat> Sending,
+    IReadOnlyList<DailySends> Days,
+    IReadOnlyList<PipelineStage> Pipeline,
     int UnreadConversations,
     int PendingInvitations,
     int ActiveCampaigns,
@@ -21,6 +27,13 @@ public sealed record DashboardDto(
 
 /// <param name="Limit">The connected accounts' daily limits for this kind, added up. 0 with none connected.</param>
 public sealed record SendingStat(MessageKind Kind, int Sent, int Limit);
+
+/// <summary>What went out on one day, and how many replies came in.</summary>
+/// <param name="Day">A date on the workspace's own calendar (its working-hours time zone).</param>
+public sealed record DailySends(DateOnly Day, int Invitations, int LinkedInMessages, int Emails, int Replies);
+
+/// <summary>Leads at one stage. Archived leads aren't counted.</summary>
+public sealed record PipelineStage(LeadStatus Status, int Count);
 
 /// <summary>Leads who wrote back, counted as people rather than messages.</summary>
 /// <param name="ContactedLast30Days">Leads sent anything in the last 30 days.</param>
@@ -55,9 +68,10 @@ public sealed record ActivityDto(
 /// <summary>The getting-started checklist, ticked off from what actually exists.</summary>
 public sealed record SetupDto(bool HasMailbox, bool HasLinkedIn, bool HasLeads, bool HasCampaign, bool HasLaunchedCampaign);
 
-public sealed class GetDashboardHandler(IAppDbContext db, TimeProvider clock)
+public sealed class GetDashboardHandler(IAppDbContext db, WorkspaceContext workspace, TimeProvider clock)
 {
     private const int ActivityItems = 12;
+    private const int ChartDays = 14;
 
     public async Task<DashboardDto> Handle(CancellationToken ct)
     {
@@ -66,8 +80,12 @@ public sealed class GetDashboardHandler(IAppDbContext db, TimeProvider clock)
             .Where(a => a.Status == AccountStatus.Connected)
             .ToListAsync(ct);
 
+        var current = await CurrentWorkspace.LoadAsync(db, workspace, ct);
+
         return new DashboardDto(
             await SendingAsync(now, connected, ct),
+            await DaysAsync(now, current.TimeZoneId, ct),
+            await PipelineAsync(ct),
             await Conversations.InView(db, ConversationView.Unread).CountAsync(ct),
             await PendingInvitationsAsync(now, ct),
             await db.Campaigns.CountAsync(c => c.Status == CampaignStatus.Active, ct),
@@ -108,6 +126,52 @@ public sealed class GetDashboardHandler(IAppDbContext db, TimeProvider clock)
             Stat(MessageKind.LinkedInMessage, AccountChannel.LinkedIn),
             Stat(MessageKind.Email, AccountChannel.Email),
         ];
+    }
+
+    /// <summary>
+    /// Sends and replies for each of the last 14 days. Days follow the workspace's time zone, so
+    /// "today" starts at the founder's midnight rather than the server's.
+    /// </summary>
+    private async Task<IReadOnlyList<DailySends>> DaysAsync(DateTimeOffset now, string timeZoneId, CancellationToken ct)
+    {
+        var zone = TimeZoneInfo.TryFindSystemTimeZoneById(timeZoneId, out var found) ? found : TimeZoneInfo.Utc;
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
+        var firstDay = today.AddDays(1 - ChartDays);
+
+        // A day more than the window, whatever the offset; anything before the first day is dropped below.
+        var since = now.AddDays(-ChartDays - 1);
+        var messages = await db.Messages.AsNoTracking()
+            .Where(m => m.SentAt > since && (m.Direction == MessageDirection.Outbound || m.LeadId != null))
+            .Select(m => new { m.Kind, m.Direction, m.SentAt })
+            .ToListAsync(ct);
+        var byDay = messages.ToLookup(m => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(m.SentAt, zone).DateTime));
+
+        return Enumerable.Range(0, ChartDays)
+            .Select(offset =>
+            {
+                var day = firstDay.AddDays(offset);
+                var sent = byDay[day].Where(m => m.Direction == MessageDirection.Outbound).ToList();
+                return new DailySends(
+                    day,
+                    sent.Count(m => m.Kind == MessageKind.LinkedInInvitation),
+                    sent.Count(m => m.Kind == MessageKind.LinkedInMessage),
+                    sent.Count(m => m.Kind == MessageKind.Email),
+                    byDay[day].Count(m => m.Direction == MessageDirection.Inbound));
+            })
+            .ToList();
+    }
+
+    private async Task<IReadOnlyList<PipelineStage>> PipelineAsync(CancellationToken ct)
+    {
+        var counts = await db.Leads.AsNoTracking()
+            .Where(l => l.ArchivedAt == null)
+            .GroupBy(l => l.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Status, x => x.Count, ct);
+
+        return Enum.GetValues<LeadStatus>()
+            .Select(status => new PipelineStage(status, counts.GetValueOrDefault(status)))
+            .ToList();
     }
 
     /// <summary>Requests a sequence still waits on. Older ones have lapsed.</summary>

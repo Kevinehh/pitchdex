@@ -1,0 +1,60 @@
+.prompt {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+  color: var(--foreground);
+  font-size: var(--text-xs);
+  text-decoration: none;
+  transition: border-color 120ms;
+}
+
+.prompt:hover {
+  border-color: var(--brand);
+}
+
+.prompt:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.progress,
+.hint {
+  color: var(--muted-foreground);
+}
+
+.bar {
+  height: 4px;
+  margin-bottom: var(--space-1);
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.go {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  color: var(--brand);
+  font-weight: 500;
+}
+
+.go svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}

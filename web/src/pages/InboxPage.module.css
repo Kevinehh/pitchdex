@@ -12,11 +12,11 @@
   color: var(--destructive);
 }
 
-/* Fills the screen below the header; each column scrolls on its own. */
+/* Fills the screen below the top bar and the page header; each column scrolls on its own. */
 .inbox {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  height: calc(100dvh - 12rem);
+  height: calc(100dvh - 11.75rem);
   min-height: 30rem;
   overflow: hidden;
   border: 1px solid var(--border);

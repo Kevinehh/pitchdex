@@ -3,15 +3,17 @@ import { useSearchParams } from "react-router"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SendingLimitsEditor } from "@/features/accounts"
+import { CalendlySettings } from "@/features/meetings"
 import { WorkingHoursSettings } from "@/features/workspace"
 import styles from "./SettingsPage.module.css"
 
-type Tab = "limits" | "hours"
+const tabs = ["limits", "hours", "meetings"] as const
+type Tab = (typeof tabs)[number]
 
-/** How Pitchdex sends: each account's daily limits, and the default working hours. */
+/** How Pitchdex sends: each account's daily limits, the default working hours, and Calendly. */
 export default function SettingsPage() {
   const [params, setParams] = useSearchParams()
-  const tab: Tab = params.get("tab") === "hours" ? "hours" : "limits"
+  const tab: Tab = tabs.find((name) => name === params.get("tab")) ?? "limits"
 
   return (
     <>
@@ -19,12 +21,13 @@ export default function SettingsPage() {
 
       <Tabs
         value={tab}
-        onValueChange={(value) => setParams(value === "hours" ? { tab: "hours" } : {})}
+        onValueChange={(value) => setParams(value === "limits" ? {} : { tab: String(value) })}
         className={styles.card}
       >
         <TabsList variant="line">
           <TabsTrigger value="limits">Limits &amp; activity control</TabsTrigger>
           <TabsTrigger value="hours">Working hours</TabsTrigger>
+          <TabsTrigger value="meetings">Meetings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="limits" className={styles.limits}>
@@ -63,6 +66,10 @@ export default function SettingsPage() {
             </h2>
             <WorkingHoursSettings />
           </section>
+        </TabsContent>
+
+        <TabsContent value="meetings" className={styles.single}>
+          <CalendlySettings />
         </TabsContent>
       </Tabs>
     </>

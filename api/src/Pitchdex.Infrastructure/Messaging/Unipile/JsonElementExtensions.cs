@@ -34,6 +34,17 @@ internal static class JsonElementExtensions
             ? date
             : null;
 
+    public static int? Int(this JsonElement element, string name) =>
+        element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var number)
+            ? number
+            : null;
+
+    /// <summary>The items of an array field, or none when it's missing.</summary>
+    public static IEnumerable<JsonElement> Array(this JsonElement element, string name) =>
+        element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array
+            ? value.EnumerateArray()
+            : [];
+
     public static IEnumerable<JsonElement> Items(this JsonDocument document) =>
         document.RootElement.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array
             ? items.EnumerateArray()

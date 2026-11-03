@@ -1,20 +1,24 @@
 import { useId, type ReactNode } from "react"
 import { Link } from "react-router"
+import { cn } from "@/lib/utils"
 import styles from "./Panel.module.css"
 
 type PanelProps = {
   title: string
   /** Optional link in the top-right corner, such as "Open inbox". */
   action?: { label: string; to: string }
+  /** The body scrolls inside the panel. Give the panel a height through className. */
+  scroll?: boolean
+  className?: string
   children: ReactNode
 }
 
 /** A titled box on a page. Dashboard sections are all Panels. */
-export function Panel({ title, action, children }: PanelProps) {
+export function Panel({ title, action, scroll, className, children }: PanelProps) {
   const titleId = useId()
 
   return (
-    <section className={styles.panel} aria-labelledby={titleId}>
+    <section className={cn(styles.panel, className)} aria-labelledby={titleId}>
       <header className={styles.header}>
         <h2 id={titleId} className={styles.title}>
           {title}
@@ -25,7 +29,7 @@ export function Panel({ title, action, children }: PanelProps) {
           </Link>
         )}
       </header>
-      <div className={styles.body}>{children}</div>
+      <div className={cn(styles.body, scroll && styles.scroll)}>{children}</div>
     </section>
   )
 }

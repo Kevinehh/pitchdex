@@ -81,8 +81,3 @@
   color: var(--muted-foreground);
 }
 
-/* A long feed scrolls inside the panel instead of stretching the row. */
-.list {
-  max-height: 24rem;
-  overflow-y: auto;
-}

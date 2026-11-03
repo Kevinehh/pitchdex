@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Pitchdex.Application.Common;
 using Pitchdex.Application.Integrations;
+using Pitchdex.Infrastructure.Calendly;
 using Pitchdex.Infrastructure.Messaging;
 using Pitchdex.Infrastructure.Messaging.Practice;
 using Pitchdex.Infrastructure.Messaging.Unipile;
 using Pitchdex.Infrastructure.Persistence;
+using Pitchdex.Infrastructure.Security;
 
 namespace Pitchdex.Infrastructure;
 
@@ -30,8 +32,22 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
         AddMessaging(services, messaging);
+        AddCalendly(services);
 
         return services;
+    }
+
+    /// <summary>Calendly needs no app key: each founder connects with their own token.</summary>
+    private static void AddCalendly(IServiceCollection services)
+    {
+        services.AddDataProtection();
+        services.AddSingleton<ISecretProtector, DataProtectionSecretProtector>();
+        services.AddHttpClient<ICalendlyClient, CalendlyClient>(http =>
+        {
+            http.BaseAddress = new Uri(CalendlyClient.BaseAddress);
+            http.DefaultRequestHeaders.Add("Accept", "application/json");
+            http.Timeout = TimeSpan.FromSeconds(30);
+        });
     }
 
     /// <summary>Unipile when a key is set, otherwise the in-memory practice provider.</summary>

@@ -25,10 +25,16 @@ const kinds: Record<ActivityKind, { icon: LucideIcon; verb: string; reply?: bool
   StepFailed: { icon: CircleAlert, verb: "A step failed for" },
 }
 
-/** What happened lately: sends, replies and failed steps, newest first. */
-export function RecentActivity({ activity }: { activity: Activity[] }) {
+/** What happened lately: sends, replies and failed steps, newest first. It scrolls inside the height className gives it. */
+export function RecentActivity({
+  activity,
+  className,
+}: {
+  activity: Activity[]
+  className?: string
+}) {
   return (
-    <Panel title="Recent activity">
+    <Panel title="Recent activity" scroll className={className}>
       {activity.length === 0 ? (
         <p className={styles.empty}>
           Nothing yet. Sends and replies show up here as campaigns run.

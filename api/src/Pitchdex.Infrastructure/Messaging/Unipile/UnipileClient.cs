@@ -37,6 +37,11 @@ internal sealed class UnipileClient(HttpClient http)
     public Task<JsonDocument> GetAccountAsync(string accountId, CancellationToken ct) =>
         SendAsync(new HttpRequestMessage(HttpMethod.Get, $"accounts/{Uri.EscapeDataString(accountId)}"), ct);
 
+    public async Task DeleteAccountAsync(string accountId, CancellationToken ct)
+    {
+        using var _ = await SendAsync(new HttpRequestMessage(HttpMethod.Delete, $"accounts/{Uri.EscapeDataString(accountId)}"), ct);
+    }
+
     public Task<JsonDocument> SendEmailAsync(
         string accountId,
         string toAddress,
@@ -67,12 +72,16 @@ internal sealed class UnipileClient(HttpClient http)
         return SendAsync(request, ct);
     }
 
-    /// <summary>A LinkedIn profile, looked up by the part of the link after /in/.</summary>
-    public Task<JsonDocument> GetUserProfileAsync(string accountId, string publicIdentifier, CancellationToken ct) =>
+    /// <summary>
+    /// A LinkedIn profile, looked up by the part of the link after /in/ or by its provider id.
+    /// With sections, it also has a preview of their experience, education and About section.
+    /// </summary>
+    public Task<JsonDocument> GetUserProfileAsync(string accountId, string identifier, bool withSections, CancellationToken ct) =>
         SendAsync(
             new HttpRequestMessage(
                 HttpMethod.Get,
-                $"users/{Uri.EscapeDataString(publicIdentifier)}?account_id={Uri.EscapeDataString(accountId)}"),
+                $"users/{Uri.EscapeDataString(identifier)}?account_id={Uri.EscapeDataString(accountId)}"
+                + (withSections ? "&linkedin_sections=*_preview" : "")),
             ct);
 
     public async Task SendInvitationAsync(string accountId, string providerId, string? note, CancellationToken ct)

@@ -48,75 +48,81 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Pitchdex blue, the same family as the landing page. Light is the base set; dark applies when
+ * src/lib/theme.ts puts the `dark` class on <html>.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: #f7f9fc;
+  --foreground: #0b1020;
+  --card: #ffffff;
+  --card-foreground: #0b1020;
+  --popover: #ffffff;
+  --popover-foreground: #0b1020;
+  --primary: #2457e6;
+  --primary-foreground: #ffffff;
+  --secondary: #eef2f9;
+  --secondary-foreground: #1c2540;
+  --muted: #eef2f9;
+  --muted-foreground: #5b6478;
+  --accent: #eaf1ff;
+  --accent-foreground: #1c45c4;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: #e3e8f1;
+  --input: #dde3ee;
+  --ring: #3b74f6;
+  --chart-1: #8db6ff;
+  --chart-2: #3b74f6;
+  --chart-3: #2457e6;
+  --chart-4: #1c45c4;
+  --chart-5: #0f1f4d;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0b1020;
+  --sidebar-primary: #2457e6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf1ff;
+  --sidebar-accent-foreground: #1c45c4;
+  --sidebar-border: #e3e8f1;
+  --sidebar-ring: #3b74f6;
+  color-scheme: light;
 }
 
 .dark {
   /* Native controls (scrollbars, date pickers) follow the dark theme too. */
   color-scheme: dark;
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #080b12;
+  --foreground: #eef1f8;
+  --card: #10141e;
+  --card-foreground: #eef1f8;
+  --popover: #141a27;
+  --popover-foreground: #eef1f8;
+  /* Deep enough for white button text to stay readable. */
+  --primary: #2f68ea;
+  --primary-foreground: #ffffff;
+  --secondary: #182033;
+  --secondary-foreground: #e3e9f6;
+  --muted: #161d2c;
+  --muted-foreground: #8b94a8;
+  --accent: #1a2438;
+  --accent-foreground: #eef1f8;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: rgb(160 180 230 / 11%);
+  --input: rgb(160 180 230 / 16%);
+  --ring: #4d84ff;
+  --chart-1: #a3c0ff;
+  --chart-2: #6f9bff;
+  --chart-3: #4d84ff;
+  --chart-4: #2f68ea;
+  --chart-5: #1c45c4;
+  --sidebar: #0b0f18;
+  --sidebar-foreground: #c9d1e2;
+  --sidebar-primary: #4d84ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(77 132 255 / 14%);
+  --sidebar-accent-foreground: #dbe6ff;
+  --sidebar-border: rgb(160 180 230 / 9%);
+  --sidebar-ring: #4d84ff;
 }
 
 @layer base {
@@ -153,8 +159,31 @@
   --text-3xl: 1.875rem;
 
   --success: oklch(0.55 0.14 150);
+  /* The Pitchdex blue for accents: rings, active links, highlights. Not for button fills (--primary). */
+  --brand: #2457e6;
+  --brand-soft: rgb(36 87 230 / 10%);
+  --warning: oklch(0.6 0.16 50);
+  --star: oklch(0.75 0.17 70);
+  --shadow-popover: 0 12px 32px rgb(16 24 40 / 14%);
+  /* Each kind of send keeps its colour: invitations --brand, LinkedIn messages and emails these. */
+  --linkedin: #0284c7;
+  --linkedin-soft: rgb(2 132 199 / 10%);
+  --email: #0d9488;
+  --email-soft: rgb(13 148 136 / 10%);
+  /* Leads at the Meeting stage. */
+  --meeting: #7c3aed;
 }
 
 .dark {
   --success: oklch(0.76 0.15 155);
+  --brand: #4d84ff;
+  --brand-soft: rgb(77 132 255 / 14%);
+  --warning: oklch(0.7 0.16 45);
+  --star: oklch(0.8 0.15 85);
+  --shadow-popover: 0 12px 32px rgb(0 0 0 / 45%);
+  --linkedin: #38bdf8;
+  --linkedin-soft: rgb(56 189 248 / 14%);
+  --email: #2dd4bf;
+  --email-soft: rgb(45 212 191 / 14%);
+  --meeting: #a78bfa;
 }

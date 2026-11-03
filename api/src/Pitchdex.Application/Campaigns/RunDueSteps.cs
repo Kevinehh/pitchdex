@@ -27,10 +27,13 @@ public sealed record SequenceRunResult(int Sent, int Waiting, int Finished, int 
 public sealed class RunDueStepsHandler(
     IAppDbContext db,
     LeadMessenger messenger,
+    WorkspaceContext workspace,
     TimeProvider clock,
     ILogger<RunDueStepsHandler> logger)
 {
     private const int BatchSize = 50;
+
+    private string? calendlyUrl;
 
     private enum Outcome
     {
@@ -60,6 +63,12 @@ public sealed class RunDueStepsHandler(
             .Include(c => c.Steps)
             .Where(c => campaignIds.Contains(c.Id))
             .ToDictionaryAsync(c => c.Id, ct);
+
+        // Read once per run; a step using {{calendly}} fails with a clear reason if it's missing.
+        calendlyUrl = await db.Workspaces
+            .Where(w => w.Id == workspace.RequiredId)
+            .Select(w => w.CalendlyUrl)
+            .FirstOrDefaultAsync(ct);
 
         var accountsUsedThisRun = new HashSet<Guid>();
         int sent = 0, waiting = 0, finished = 0, skipped = 0;
@@ -168,10 +177,10 @@ public sealed class RunDueStepsHandler(
 
     private async Task SendAsync(Lead lead, ConnectedAccount account, CampaignStep step, CampaignSource source, CancellationToken ct)
     {
-        var body = MessageTemplate.Render(step.Body, lead);
+        var body = MessageTemplate.Render(step.Body, lead, calendlyUrl);
         if (step.Type == StepType.Email)
         {
-            var subject = MessageTemplate.Render(step.Subject ?? "", lead);
+            var subject = MessageTemplate.Render(step.Subject ?? "", lead, calendlyUrl);
             await messenger.SendEmailAsync(lead, account, subject, body, source, replyTo: null, ct);
         }
         else

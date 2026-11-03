@@ -46,8 +46,14 @@ if (messaging.UsesUnipile && (string.IsNullOrWhiteSpace(messaging.PublicApiUrl) 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(connectionString, sampleData, messaging);
 builder.Services.AddPitchdexAuth(builder.Environment);
-builder.Services.AddHostedService<MessagingSyncWorker>();
-builder.Services.AddHostedService<SequenceWorker>();
+
+// Background sending and syncing. Only one instance should run them, so extra API instances
+// (a second server, or a local test copy) set Workers:Enabled to false.
+if (builder.Configuration.GetValue("Workers:Enabled", defaultValue: true))
+{
+    builder.Services.AddHostedService<MessagingSyncWorker>();
+    builder.Services.AddHostedService<SequenceWorker>();
+}
 
 builder.Services.ConfigureHttpJsonOptions(options => ConfigureJson(options.SerializerOptions));
 builder.Services

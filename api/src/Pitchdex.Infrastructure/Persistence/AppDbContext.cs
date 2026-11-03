@@ -8,6 +8,7 @@ using Pitchdex.Domain.Campaigns;
 using Pitchdex.Domain.Common;
 using Pitchdex.Domain.Investors;
 using Pitchdex.Domain.Leads;
+using Pitchdex.Domain.Meetings;
 using Pitchdex.Domain.Messages;
 using Pitchdex.Domain.Workspaces;
 using Pitchdex.Infrastructure.Identity;
@@ -35,6 +36,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, Workspa
     public DbSet<Investor> Investors => Set<Investor>();
 
     public DbSet<Lead> Leads => Set<Lead>();
+
+    public DbSet<Meeting> Meetings => Set<Meeting>();
 
     public DbSet<Workspace> Workspaces => Set<Workspace>();
 

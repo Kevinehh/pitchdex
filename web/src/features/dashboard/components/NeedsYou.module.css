@@ -1,0 +1,101 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loading {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.skeleton {
+  height: 2.75rem;
+}
+
+/* Each kind of to-do keeps a colour, on its icon. */
+.call,
+.setup {
+  --tone: var(--brand);
+  --tone-soft: var(--brand-soft);
+}
+
+.reply {
+  --tone: var(--email);
+  --tone-soft: var(--email-soft);
+}
+
+.paused {
+  --tone: var(--warning);
+  --tone-soft: color-mix(in srgb, var(--warning) 14%, transparent);
+}
+
+.fine {
+  --tone: var(--muted-foreground);
+  --tone-soft: var(--muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3.25rem;
+  padding-block: var(--space-2);
+}
+
+.row + .row {
+  border-top: 1px solid var(--border);
+}
+
+.icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--tone-soft);
+  color: var(--tone);
+}
+
+.icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.title,
+.detail {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.title {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.fine .title {
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+
+.detail {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.error {
+  color: var(--destructive);
+}
+
+.action {
+  flex-shrink: 0;
+}

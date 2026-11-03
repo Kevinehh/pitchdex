@@ -3,6 +3,7 @@ using Pitchdex.Domain.Accounts;
 using Pitchdex.Domain.Campaigns;
 using Pitchdex.Domain.Investors;
 using Pitchdex.Domain.Leads;
+using Pitchdex.Domain.Meetings;
 using Pitchdex.Domain.Messages;
 using Pitchdex.Domain.Workspaces;
 
@@ -26,6 +27,8 @@ public interface IAppDbContext
     DbSet<Investor> Investors { get; }
 
     DbSet<Lead> Leads { get; }
+
+    DbSet<Meeting> Meetings { get; }
 
     DbSet<Workspace> Workspaces { get; }
 

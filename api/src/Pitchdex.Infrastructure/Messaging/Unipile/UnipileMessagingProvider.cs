@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using Pitchdex.Application.Integrations;
 using Pitchdex.Domain.Accounts;
+using Pitchdex.Domain.Leads;
 using Pitchdex.Domain.Messages;
 
 namespace Pitchdex.Infrastructure.Messaging.Unipile;
@@ -59,6 +60,9 @@ internal sealed class UnipileMessagingProvider(UnipileClient unipile, MessagingS
         return ToAccount(response.RootElement);
     }
 
+    public Task RemoveAccountAsync(string externalId, CancellationToken ct) =>
+        unipile.DeleteAccountAsync(externalId, ct);
+
     /// <summary>Email and LinkedIn accounts become ProviderAccounts. Other kinds (WhatsApp, calendars) are skipped.</summary>
     private static ProviderAccount? ToAccount(JsonElement item)
     {
@@ -108,12 +112,60 @@ internal sealed class UnipileMessagingProvider(UnipileClient unipile, MessagingS
         return new SentItem(root.Str("provider_id") ?? root.Str("tracking_id"), root.Str("thread_id"));
     }
 
-    public async Task<string> ResolveProfileIdAsync(string accountExternalId, string publicIdentifier, CancellationToken ct)
+    public async Task<LinkedInPerson> GetProfileAsync(string accountExternalId, string identifier, bool withBackground, CancellationToken ct)
     {
-        using var profile = await unipile.GetUserProfileAsync(accountExternalId, publicIdentifier, ct);
-        return profile.RootElement.Str("provider_id")
+        using var response = await unipile.GetUserProfileAsync(accountExternalId, identifier, withBackground, ct);
+        var profile = response.RootElement;
+        var providerId = profile.Str("provider_id")
             ?? throw new ProviderException("LinkedIn didn't return that profile. Check the lead's LinkedIn link.");
+
+        return new LinkedInPerson(
+            providerId,
+            profile.Str("headline"),
+            profile.Str("location"),
+            profile.Str("profile_picture_url"),
+            profile.Str("network_distance") switch
+            {
+                "FIRST_DEGREE" => LinkedInDegree.First,
+                "SECOND_DEGREE" => LinkedInDegree.Second,
+                "THIRD_DEGREE" => LinkedInDegree.Third,
+                "OUT_OF_NETWORK" => LinkedInDegree.OutOfNetwork,
+                _ => null,
+            },
+            profile.Flag("is_open_profile"),
+            profile.Flag("is_premium"),
+            withBackground ? ReadBackground(profile) : null);
     }
+
+    private static LinkedInBackground ReadBackground(JsonElement profile) =>
+        new(
+            profile.Str("summary"),
+            profile.Int("follower_count"),
+            profile.Int("connections_count"),
+            profile.Int("shared_connections_count"),
+            profile.Array("work_experience")
+                .Where(role => role.Str("position") is not null)
+                .Select(role => new LinkedInRole(
+                    role.Str("position")!,
+                    role.Str("company"),
+                    role.Str("company_picture_url"),
+                    ProfileDate(role.Str("start")),
+                    ProfileDate(role.Str("end")),
+                    role.Str("description") is { Length: > 0 } description ? description : null))
+                .ToList(),
+            profile.Array("education")
+                .Where(school => school.Str("school") is not null)
+                .Select(school => new LinkedInSchool(
+                    school.Str("school")!,
+                    school.Str("degree"),
+                    school.Str("school_picture_url"),
+                    ProfileDate(school.Str("start")),
+                    ProfileDate(school.Str("end"))))
+                .ToList());
+
+    /// <summary>Unipile writes profile dates as month/day/year, such as 3/1/2022.</summary>
+    private static DateOnly? ProfileDate(string? value) =>
+        DateOnly.TryParseExact(value, "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : null;
 
     public Task SendInvitationAsync(string accountExternalId, string profileId, string? note, CancellationToken ct) =>
         unipile.SendInvitationAsync(accountExternalId, profileId, note, ct);

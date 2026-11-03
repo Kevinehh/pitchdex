@@ -2,7 +2,7 @@ import { z } from "zod"
 import type { Campaign, StepType, UpdateCampaignInput } from "./types"
 
 /** The fields a step can use. Matches MessageTemplate on the backend. */
-export const TEMPLATE_FIELDS = ["firstName", "fullName", "firm"] as const
+export const TEMPLATE_FIELDS = ["firstName", "fullName", "firm", "calendly"] as const
 
 /** LinkedIn caps connection-request notes at 300 characters. */
 export const MAX_INVITE_NOTE = 300

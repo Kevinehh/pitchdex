@@ -1,0 +1,24 @@
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.notice p {
+  flex: 1;
+  min-width: 14rem;
+  margin: 0;
+}
+
+.noticeIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--muted-foreground);
+}
