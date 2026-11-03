@@ -14,6 +14,11 @@ public sealed class CampaignsController : ControllerBase
     public Task<IReadOnlyList<CampaignSummaryDto>> List([FromServices] ListCampaignsHandler handler, CancellationToken ct) =>
         handler.Handle(ct);
 
+    [HttpGet("templates")]
+    [ProducesResponseType<IReadOnlyList<CampaignTemplate>>(StatusCodes.Status200OK)]
+    public IReadOnlyList<CampaignTemplate> Templates([FromServices] ListCampaignTemplatesHandler handler) =>
+        handler.Handle();
+
     [HttpPost]
     [ProducesResponseType<CampaignDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

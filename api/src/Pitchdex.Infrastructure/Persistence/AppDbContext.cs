@@ -39,6 +39,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, Workspa
 
     public DbSet<Meeting> Meetings => Set<Meeting>();
 
+    public DbSet<ProfileView> ProfileViews => Set<ProfileView>();
+
     public DbSet<Workspace> Workspaces => Set<Workspace>();
 
     public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();

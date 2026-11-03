@@ -7,7 +7,8 @@ using Pitchdex.Domain.Campaigns;
 
 namespace Pitchdex.Application.Campaigns;
 
-public sealed record CreateCampaignCommand(string Name, string? TimeZoneId = null);
+/// <param name="TemplateId">A template from the gallery to start from. Without one, the campaign starts with one email.</param>
+public sealed record CreateCampaignCommand(string Name, string? TimeZoneId = null, string? TemplateId = null);
 
 public sealed class CreateCampaignValidator : AbstractValidator<CreateCampaignCommand>
 {
@@ -18,15 +19,29 @@ public sealed class CreateCampaignValidator : AbstractValidator<CreateCampaignCo
             .Must(id => TimeZoneInfo.TryFindSystemTimeZoneById(id!, out _))
             .WithMessage("Choose a valid time zone.")
             .When(c => c.TimeZoneId is not null);
+        RuleFor(c => c.TemplateId)
+            .Must(id => CampaignTemplates.Find(id!) is not null)
+            .WithMessage("Choose one of the templates.")
+            .When(c => c.TemplateId is not null);
     }
 }
 
 /// <summary>
-/// Creates a draft campaign with one starter email step to edit, and the founder's first
-/// connected accounts already chosen as senders.
+/// Creates a draft campaign from a template, or with one starter email step to edit, and the
+/// founder's first connected accounts already chosen as senders.
 /// </summary>
 public sealed class CreateCampaignHandler(IAppDbContext db, WorkspaceContext workspace)
 {
+    private static readonly StepInput StarterEmail = new(
+        "intro",
+        ParentKey: null,
+        Branch: null,
+        StepType.Email,
+        DelayDays: 0,
+        WaitDays: 0,
+        "Quick intro",
+        "Hi {{firstName}},\n\nI'm raising our seed round and thought {{firm}} could be a great fit. Open to a short call?\n\nThanks");
+
     public async Task<CampaignDto> Handle(CreateCampaignCommand command, CancellationToken ct)
     {
         var accounts = await db.ConnectedAccounts
@@ -39,16 +54,9 @@ public sealed class CreateCampaignHandler(IAppDbContext db, WorkspaceContext wor
             Name = command.Name.Trim(),
             EmailAccountId = accounts.FirstOrDefault(a => a.Channel == AccountChannel.Email)?.Id,
             LinkedInAccountId = accounts.FirstOrDefault(a => a.Channel == AccountChannel.LinkedIn)?.Id,
-            Steps =
-            [
-                new CampaignStep
-                {
-                    Position = 0,
-                    Type = StepType.Email,
-                    Subject = "Quick intro",
-                    Body = "Hi {{firstName}},\n\nI'm raising our seed round and thought {{firm}} could be a great fit. Open to a short call?\n\nThanks",
-                },
-            ],
+            Steps = SequenceTree.Build(command.TemplateId is { } templateId
+                ? CampaignTemplates.Find(templateId)!.Steps
+                : [StarterEmail]),
         };
 
         // New campaigns start from the workspace's working hours, set in Settings.

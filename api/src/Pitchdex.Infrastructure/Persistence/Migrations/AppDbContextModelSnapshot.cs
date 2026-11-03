@@ -349,6 +349,11 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
+                    b.Property<string>("Branch")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("branch");
+
                     b.Property<Guid>("CampaignId")
                         .HasColumnType("uuid")
                         .HasColumnName("campaign_id");
@@ -356,6 +361,10 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                     b.Property<int>("DelayDays")
                         .HasColumnType("integer")
                         .HasColumnName("delay_days");
+
+                    b.Property<Guid?>("ParentStepId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_step_id");
 
                     b.Property<int>("Position")
                         .HasColumnType("integer")
@@ -372,11 +381,17 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("type");
 
+                    b.Property<int>("WaitDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("wait_days");
+
                     b.HasKey("Id")
                         .HasName("pk_campaign_steps");
 
+                    b.HasIndex("ParentStepId")
+                        .HasDatabaseName("ix_campaign_steps_parent_step_id");
+
                     b.HasIndex("CampaignId", "Position")
-                        .IsUnique()
                         .HasDatabaseName("ix_campaign_steps_campaign_id_position");
 
                     b.ToTable("campaign_steps", (string)null);
@@ -413,9 +428,9 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_run_at");
 
-                    b.Property<int>("NextStepPosition")
-                        .HasColumnType("integer")
-                        .HasColumnName("next_step_position");
+                    b.Property<Guid?>("NextStepId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("next_step_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -436,6 +451,9 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("LeadId")
                         .HasDatabaseName("ix_enrollments_lead_id");
+
+                    b.HasIndex("NextStepId")
+                        .HasDatabaseName("ix_enrollments_next_step_id");
 
                     b.HasIndex("WorkspaceId")
                         .HasDatabaseName("ix_enrollments_workspace_id");
@@ -682,6 +700,57 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_leads_workspace_id_investor_id");
 
                     b.ToTable("leads", (string)null);
+                });
+
+            modelBuilder.Entity("Pitchdex.Domain.Leads.ProfileView", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<Guid?>("CampaignStepId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("campaign_step_id");
+
+                    b.Property<Guid?>("EnrollmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("enrollment_id");
+
+                    b.Property<Guid>("LeadId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lead_id");
+
+                    b.Property<DateTimeOffset>("ViewedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("viewed_at");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workspace_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_profile_views");
+
+                    b.HasIndex("CampaignStepId")
+                        .HasDatabaseName("ix_profile_views_campaign_step_id");
+
+                    b.HasIndex("EnrollmentId")
+                        .HasDatabaseName("ix_profile_views_enrollment_id");
+
+                    b.HasIndex("LeadId")
+                        .HasDatabaseName("ix_profile_views_lead_id");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("ix_profile_views_workspace_id");
+
+                    b.HasIndex("AccountId", "ViewedAt")
+                        .HasDatabaseName("ix_profile_views_account_id_viewed_at");
+
+                    b.ToTable("profile_views", (string)null);
                 });
 
             modelBuilder.Entity("Pitchdex.Domain.Meetings.Meeting", b =>
@@ -1180,6 +1249,12 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_enrollments_leads_lead_id");
 
+                    b.HasOne("Pitchdex.Domain.Campaigns.CampaignStep", null)
+                        .WithMany()
+                        .HasForeignKey("NextStepId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_enrollments_campaign_steps_next_step_id");
+
                     b.HasOne("Pitchdex.Domain.Workspaces.Workspace", null)
                         .WithMany()
                         .HasForeignKey("WorkspaceId")
@@ -1251,6 +1326,42 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("LinkedIn");
+                });
+
+            modelBuilder.Entity("Pitchdex.Domain.Leads.ProfileView", b =>
+                {
+                    b.HasOne("Pitchdex.Domain.Accounts.ConnectedAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_profile_views_connected_accounts_account_id");
+
+                    b.HasOne("Pitchdex.Domain.Campaigns.CampaignStep", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignStepId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_profile_views_campaign_steps_campaign_step_id");
+
+                    b.HasOne("Pitchdex.Domain.Campaigns.Enrollment", null)
+                        .WithMany()
+                        .HasForeignKey("EnrollmentId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_profile_views_enrollments_enrollment_id");
+
+                    b.HasOne("Pitchdex.Domain.Leads.Lead", null)
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_profile_views_leads_lead_id");
+
+                    b.HasOne("Pitchdex.Domain.Workspaces.Workspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_profile_views_workspaces_workspace_id");
                 });
 
             modelBuilder.Entity("Pitchdex.Domain.Meetings.Meeting", b =>

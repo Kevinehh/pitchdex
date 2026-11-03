@@ -115,7 +115,17 @@ internal sealed class UnipileMessagingProvider(UnipileClient unipile, MessagingS
     public async Task<LinkedInPerson> GetProfileAsync(string accountExternalId, string identifier, bool withBackground, CancellationToken ct)
     {
         using var response = await unipile.GetUserProfileAsync(accountExternalId, identifier, withBackground, ct);
-        var profile = response.RootElement;
+        return ReadPerson(response.RootElement, withBackground);
+    }
+
+    public async Task<LinkedInPerson> ViewProfileAsync(string accountExternalId, string identifier, CancellationToken ct)
+    {
+        using var response = await unipile.GetUserProfileAsync(accountExternalId, identifier, withSections: false, ct, notify: true);
+        return ReadPerson(response.RootElement, withBackground: false);
+    }
+
+    private static LinkedInPerson ReadPerson(JsonElement profile, bool withBackground)
+    {
         var providerId = profile.Str("provider_id")
             ?? throw new ProviderException("LinkedIn didn't return that profile. Check the lead's LinkedIn link.");
 

@@ -2,7 +2,17 @@ using Pitchdex.Domain.Campaigns;
 
 namespace Pitchdex.Application.Campaigns;
 
-public sealed record StepDto(Guid Id, int Position, StepType Type, int DelayDays, string? Subject, string Body);
+/// <summary>A saved step. ParentStepId and Branch place it in the tree; the first step has neither.</summary>
+public sealed record StepDto(
+    Guid Id,
+    int Position,
+    Guid? ParentStepId,
+    StepBranch? Branch,
+    StepType Type,
+    int DelayDays,
+    int WaitDays,
+    string? Subject,
+    string Body);
 
 /// <summary>How many enrolled leads are in each state.</summary>
 public sealed record EnrollmentCounts(int Total, int Active, int Completed, int Replied, int Failed, int Stopped);

@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/table"
 import { DEFAULT_PAGE_SIZE } from "@/lib/paging"
 import { useEnrollments, useStopEnrollment } from "../hooks/useEnrollments"
-import type { Campaign, Enrollment, EnrollmentCounts, EnrollmentStatus } from "../types"
+import {
+  STEP_TYPES,
+  type Campaign,
+  type Enrollment,
+  type EnrollmentCounts,
+  type EnrollmentStatus,
+} from "../types"
 import { AddLeadsDialog } from "./AddLeadsDialog"
 import styles from "./EnrollmentsPanel.module.css"
 import { EnrollmentStatusBadge } from "./StatusBadges"
@@ -121,9 +127,7 @@ export function EnrollmentsPanel({ campaign }: { campaign: Campaign }) {
                   <TableCell>
                     <EnrollmentStatusBadge status={enrollment.status} />
                   </TableCell>
-                  <TableCell className={styles.muted}>
-                    {progress(enrollment, campaign.steps.length)}
-                  </TableCell>
+                  <TableCell className={styles.muted}>{progress(enrollment, campaign)}</TableCell>
                   <TableCell>
                     <div className={styles.next}>
                       <span>{nextStep(enrollment, campaign)}</span>
@@ -168,14 +172,17 @@ export function EnrollmentsPanel({ campaign }: { campaign: Campaign }) {
   )
 }
 
-function progress(enrollment: Enrollment, stepCount: number): string {
+/** Where the lead is: the step they're on next, or where they stopped. Branches make "3 of 5" meaningless. */
+function progress(enrollment: Enrollment, campaign: Campaign): string {
   if (enrollment.status === "Completed") {
-    return `All ${stepCount} steps sent`
+    return "Reached the end"
   }
-  if (enrollment.status === "Active") {
-    return `Step ${Math.min(enrollment.nextStepPosition + 1, stepCount)} of ${stepCount}`
+  const step = campaign.steps.find((s) => s.id === enrollment.nextStepId)
+  if (!step) {
+    return "—"
   }
-  return `${enrollment.nextStepPosition} of ${stepCount} sent`
+  const where = `step ${step.position + 1}, ${STEP_TYPES[step.type]}`
+  return enrollment.status === "Active" ? `Next: ${where}` : `Stopped before ${where}`
 }
 
 function nextStep(enrollment: Enrollment, campaign: Campaign): string {

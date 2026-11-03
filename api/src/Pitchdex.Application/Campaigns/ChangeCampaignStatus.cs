@@ -69,7 +69,7 @@ public sealed class ChangeCampaignStatusHandler(IAppDbContext db)
             await CheckSenderAsync(campaign.EmailAccountId, "Choose a connected mailbox to send the email steps from.", ct);
         }
 
-        if (steps.Any(s => s.Type != StepType.Email))
+        if (steps.Any(s => s.Type.UsesLinkedIn() || s.Type == StepType.IfInvitationAccepted))
         {
             await CheckSenderAsync(campaign.LinkedInAccountId, "Choose a connected LinkedIn account to send the LinkedIn steps from.", ct);
         }

@@ -78,6 +78,31 @@ public sealed class LeadMessenger(
         return Finish(message, lead, sent);
     }
 
+    /// <summary>
+    /// Views the lead's LinkedIn profile from the account, so LinkedIn tells them who looked, and
+    /// keeps the view for the account's daily limit. Refreshes their picture and headline on the
+    /// way. The caller saves the changes.
+    /// </summary>
+    public async Task ViewLinkedInProfileAsync(Lead lead, ConnectedAccount account, CampaignSource source, CancellationToken ct)
+    {
+        var identifier = lead.LinkedInProviderId
+            ?? LinkedInProfile.PublicIdentifier(lead.LinkedInUrl)
+            ?? throw new UseCaseException($"Add a LinkedIn profile link to {lead.FullName} first.");
+
+        var now = clock.GetUtcNow();
+        var person = await linkedIn.ViewProfileAsync(account.ExternalId, identifier, ct);
+        LinkedInProfiles.Apply(lead, person, now);
+
+        db.ProfileViews.Add(new ProfileView
+        {
+            LeadId = lead.Id,
+            AccountId = account.Id,
+            EnrollmentId = source.EnrollmentId,
+            CampaignStepId = source.StepId,
+            ViewedAt = now,
+        });
+    }
+
     private async Task<Message> StartAsync(
         Lead lead,
         ConnectedAccount account,

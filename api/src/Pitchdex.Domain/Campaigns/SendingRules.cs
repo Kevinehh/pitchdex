@@ -37,6 +37,9 @@ public static class SendingLimits
             ? [MessageKind.Email]
             : [MessageKind.LinkedInInvitation, MessageKind.LinkedInMessage];
 
+    /// <summary>Profile views a LinkedIn account makes from campaigns in a day. LinkedIn watches these too.</summary>
+    public const int ProfileViewsPerDay = 80;
+
     /// <summary>LinkedIn caps weekly invitations itself, so Pitchdex stays well under that.</summary>
     public const int LinkedInInvitationsPerWeek = 80;
 

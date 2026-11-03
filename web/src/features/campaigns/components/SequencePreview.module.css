@@ -1,0 +1,54 @@
+/* A fixed-height window; long sequences fade out at the bottom instead of growing the card. */
+.preview {
+  display: flex;
+  justify-content: center;
+  height: 6.5rem;
+  padding: var(--space-3) var(--space-2) 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--background);
+  mask-image: linear-gradient(to bottom, black 75%, transparent);
+}
+
+.chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.branches {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.step {
+  width: 3.5rem;
+  height: 0.5rem;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--kind) 70%, transparent);
+}
+
+.step[data-kind="invitation"] {
+  --kind: var(--brand);
+}
+
+.step[data-kind="message"] {
+  --kind: var(--linkedin);
+}
+
+.step[data-kind="view"] {
+  --kind: var(--muted-foreground);
+}
+
+.step[data-kind="email"] {
+  --kind: var(--email);
+}
+
+/* Conditions are wider, like the split they make. */
+.step[data-kind="condition"] {
+  --kind: var(--meeting);
+  width: 4.5rem;
+  border-radius: 999px;
+}

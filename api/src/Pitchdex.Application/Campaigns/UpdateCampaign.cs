@@ -6,9 +6,7 @@ using Pitchdex.Domain.Campaigns;
 
 namespace Pitchdex.Application.Campaigns;
 
-public sealed record StepInput(StepType Type, int DelayDays, string? Subject, string Body);
-
-/// <summary>The whole campaign as the editor saves it. Steps are listed in order.</summary>
+/// <summary>The whole campaign as the editor saves it. Steps are listed parents first.</summary>
 public sealed record UpdateCampaignCommand(
     Guid CampaignId,
     string Name,
@@ -22,8 +20,6 @@ public sealed record UpdateCampaignCommand(
 
 public sealed class UpdateCampaignValidator : AbstractValidator<UpdateCampaignCommand>
 {
-    public const int MaxSteps = 10;
-
     public UpdateCampaignValidator()
     {
         RuleFor(c => c.Name).NotEmpty().MaximumLength(200);
@@ -36,20 +32,28 @@ public sealed class UpdateCampaignValidator : AbstractValidator<UpdateCampaignCo
             .GreaterThan(c => c.SendFromHour)
             .WithMessage("Sending must end after it starts.");
         RuleFor(c => c.Steps.Count)
-            .InclusiveBetween(1, MaxSteps)
+            .InclusiveBetween(1, SequenceTree.MaxSteps)
             .OverridePropertyName("steps")
-            .WithMessage($"A campaign needs between 1 and {MaxSteps} steps.");
+            .WithMessage($"A campaign needs between 1 and {SequenceTree.MaxSteps} steps.");
+        RuleFor(c => c.Steps)
+            .Must(steps => SequenceTree.Problem(steps) is null)
+            .WithMessage(c => SequenceTree.Problem(c.Steps)!)
+            .When(c => c.Steps.Count > 0);
 
         RuleForEach(c => c.Steps).ChildRules(step =>
         {
             step.RuleFor(s => s.DelayDays).InclusiveBetween(0, 60);
+            step.RuleFor(s => s.WaitDays)
+                .InclusiveBetween(1, SequenceTree.MaxWaitDays)
+                .WithMessage($"Wait between 1 and {SequenceTree.MaxWaitDays} days.")
+                .When(s => s.Type == StepType.IfInvitationAccepted);
             step.RuleFor(s => s.Subject)
                 .NotEmpty().WithMessage("Email steps need a subject.")
                 .MaximumLength(300)
                 .When(s => s.Type == StepType.Email);
             step.RuleFor(s => s.Body)
                 .NotEmpty().WithMessage("Write the message for this step.")
-                .When(s => s.Type != StepType.LinkedInInvitation);
+                .When(s => s.Type is StepType.Email or StepType.LinkedInMessage);
             step.RuleFor(s => s.Body)
                 .MaximumLength(300).WithMessage("Connection notes can be at most 300 characters.")
                 .When(s => s.Type == StepType.LinkedInInvitation);
@@ -63,8 +67,9 @@ public sealed class UpdateCampaignValidator : AbstractValidator<UpdateCampaignCo
 }
 
 /// <summary>
-/// Saves the editor. Steps are updated in place by position, so leads part-way through
-/// keep their place; extra steps are added and removed ones deleted.
+/// Saves the editor. Saved steps keep their ids, so leads part-way through keep their place.
+/// New steps are added and missing ones removed; a lead waiting on a removed step moves to
+/// the next step below it that's still there, or finishes if there's none.
 /// </summary>
 public sealed class UpdateCampaignHandler(IAppDbContext db, WorkspaceContext workspace, TimeProvider clock)
 {
@@ -84,22 +89,29 @@ public sealed class UpdateCampaignHandler(IAppDbContext db, WorkspaceContext wor
         campaign.SendUntilHour = command.SendUntilHour;
         campaign.WeekdaysOnly = command.WeekdaysOnly;
 
-        var existing = campaign.Steps.OrderBy(s => s.Position).ToList();
+        // The tree as it was, to find where leads on removed steps go next.
+        var before = campaign.Steps.Select(s => (s.Id, s.ParentStepId, s.Branch, s.Position)).ToList();
+        var saved = campaign.Steps.ToDictionary(s => s.Id);
+        var ids = new Dictionary<string, Guid>();
+        var kept = new HashSet<Guid>();
+
         for (var position = 0; position < command.Steps.Count; position++)
         {
             var input = command.Steps[position];
-            var step = position < existing.Count ? existing[position] : AddStep(campaign, position);
+            var step = Guid.TryParse(input.Key, out var id) && saved.TryGetValue(id, out var existing) && kept.Add(id)
+                ? existing
+                : AddStep(campaign);
 
-            step.Type = input.Type;
-            step.DelayDays = position == 0 ? 0 : input.DelayDays;
-            step.Subject = input.Type == StepType.Email ? input.Subject?.Trim() : null;
-            step.Body = input.Body.Trim();
+            ids[input.Key] = step.Id;
+            SequenceTree.Apply(step, input, position, input.ParentKey is null ? null : ids[input.ParentKey]);
         }
 
-        foreach (var removed in existing.Skip(command.Steps.Count))
+        var removed = saved.Values.Where(s => !kept.Contains(s.Id)).ToList();
+        await MoveEnrollmentsOffAsync(campaign.Id, removed, before, ct);
+        foreach (var step in removed)
         {
-            campaign.Steps.Remove(removed);
-            db.CampaignSteps.Remove(removed);
+            campaign.Steps.Remove(step);
+            db.CampaignSteps.Remove(step);
         }
 
         // Touch the campaign itself, so "most recently changed" also counts step edits.
@@ -109,12 +121,67 @@ public sealed class UpdateCampaignHandler(IAppDbContext db, WorkspaceContext wor
         return await CampaignQueries.ToDtoAsync(db, campaign, ct);
     }
 
-    private CampaignStep AddStep(Campaign campaign, int position)
+    private CampaignStep AddStep(Campaign campaign)
     {
-        var step = new CampaignStep { CampaignId = campaign.Id, Position = position };
+        var step = new CampaignStep { CampaignId = campaign.Id };
         campaign.Steps.Add(step);
         db.CampaignSteps.Add(step);
         return step;
+    }
+
+    /// <summary>
+    /// Leads whose next step is being removed go to the nearest step below it that stays,
+    /// looking down Yes branches before No. Removing a single step in the editor keeps the
+    /// step after it, so that's where they land; with nothing left below, they finish.
+    /// </summary>
+    private async Task MoveEnrollmentsOffAsync(
+        Guid campaignId,
+        List<CampaignStep> removed,
+        List<(Guid Id, Guid? ParentStepId, StepBranch? Branch, int Position)> before,
+        CancellationToken ct)
+    {
+        if (removed.Count == 0)
+        {
+            return;
+        }
+
+        var removedIds = removed.Select(s => s.Id).ToHashSet();
+        var waiting = await db.Enrollments
+            .Where(e => e.CampaignId == campaignId && e.NextStepId != null && removedIds.Contains(e.NextStepId.Value))
+            .ToListAsync(ct);
+
+        var children = before.ToLookup(s => s.ParentStepId);
+        foreach (var enrollment in waiting)
+        {
+            var next = NearestKept(enrollment.NextStepId!.Value, removedIds, children);
+            enrollment.NextStepId = next;
+            if (next is null && enrollment.Status == EnrollmentStatus.Active)
+            {
+                enrollment.Finish(EnrollmentStatus.Completed, "The rest of its branch was removed from the campaign.");
+            }
+        }
+    }
+
+    private static Guid? NearestKept(
+        Guid stepId,
+        HashSet<Guid> removedIds,
+        ILookup<Guid?, (Guid Id, Guid? ParentStepId, StepBranch? Branch, int Position)> children)
+    {
+        var queue = new Queue<Guid>([stepId]);
+        while (queue.Count > 0)
+        {
+            foreach (var child in children[queue.Dequeue()].OrderBy(c => c.Branch == StepBranch.No).ThenBy(c => c.Position))
+            {
+                if (!removedIds.Contains(child.Id))
+                {
+                    return child.Id;
+                }
+
+                queue.Enqueue(child.Id);
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Caught when the campaign is saved rather than when the step sends, so no lead is dropped over it.</summary>

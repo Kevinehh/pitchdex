@@ -69,6 +69,12 @@ public interface ILinkedInChannel
     /// </summary>
     Task<LinkedInPerson> GetProfileAsync(string accountExternalId, string identifier, bool withBackground, CancellationToken ct);
 
+    /// <summary>
+    /// Like GetProfileAsync, but LinkedIn tells the person: they see the account under "Who viewed
+    /// your profile". Plain lookups don't tell them.
+    /// </summary>
+    Task<LinkedInPerson> ViewProfileAsync(string accountExternalId, string identifier, CancellationToken ct);
+
     Task SendInvitationAsync(string accountExternalId, string profileId, string? note, CancellationToken ct);
 
     /// <summary>Only works with people already connected to the account.</summary>

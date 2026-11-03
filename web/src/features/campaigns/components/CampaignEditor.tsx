@@ -15,7 +15,7 @@ import { CampaignStatsStrip } from "./CampaignStatsStrip"
 import { DeleteCampaignDialog } from "./DeleteCampaignDialog"
 import { EnrollmentsPanel } from "./EnrollmentsPanel"
 import { SendingSettings } from "./SendingSettings"
-import { SequenceEditor } from "./SequenceEditor"
+import { SequenceBuilder } from "./SequenceBuilder"
 import { CampaignStatusBadge } from "./StatusBadges"
 
 type Tab = "sequence" | "leads" | "settings"
@@ -157,7 +157,7 @@ export function CampaignEditor({ campaign }: { campaign: Campaign }) {
             </p>
           )}
           <form onSubmit={onSave} noValidate>
-            <SequenceEditor />
+            <SequenceBuilder />
           </form>
         </TabsContent>
 

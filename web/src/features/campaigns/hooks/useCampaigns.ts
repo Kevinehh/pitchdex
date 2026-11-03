@@ -23,11 +23,22 @@ export function useCampaign(id: string) {
   })
 }
 
+/** The gallery of ready-made sequences. They only change with a release, so they're fetched once. */
+export function useCampaignTemplates() {
+  return useQuery({
+    queryKey: queryKeys.campaignTemplates,
+    queryFn: ({ signal }) => unwrap(api.GET("/api/campaigns/templates", { signal })),
+    staleTime: Infinity,
+  })
+}
+
 export function useCreateCampaign() {
   const queryClient = useQueryClient()
   return useMutation({
-    // Sending hours start from the workspace's working hours, set in Settings.
-    mutationFn: (name: string) => unwrap(api.POST("/api/campaigns", { body: { name } })),
+    // Sending hours start from the workspace's working hours, set in Settings. Without a
+    // template, the campaign starts with one email.
+    mutationFn: ({ name, templateId }: { name: string; templateId: string | null }) =>
+      unwrap(api.POST("/api/campaigns", { body: { name, templateId } })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.campaigns }),
   })
 }

@@ -102,7 +102,7 @@ internal static class CampaignQueries
         var stats = await StatsAsync(db, [campaign.Id], ct);
         var steps = campaign.Steps
             .OrderBy(s => s.Position)
-            .Select(s => new StepDto(s.Id, s.Position, s.Type, s.DelayDays, s.Subject, s.Body))
+            .Select(s => new StepDto(s.Id, s.Position, s.ParentStepId, s.Branch, s.Type, s.DelayDays, s.WaitDays, s.Subject, s.Body))
             .ToList();
 
         return new CampaignDto(

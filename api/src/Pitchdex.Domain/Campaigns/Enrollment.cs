@@ -18,8 +18,8 @@ public sealed class Enrollment : IHasTimestamps, IWorkspaceOwned
 
     public EnrollmentStatus Status { get; set; } = EnrollmentStatus.Active;
 
-    /// <summary>Position of the next step to send.</summary>
-    public int NextStepPosition { get; set; }
+    /// <summary>The step this lead is on next. Empty once they've reached the end of a branch.</summary>
+    public Guid? NextStepId { get; set; }
 
     /// <summary>When the next step is due. Empty once the enrollment has finished.</summary>
     public DateTimeOffset? NextRunAt { get; set; }

@@ -1,0 +1,333 @@
+/* The drawing, with the selected step's settings beside it on wide screens and below on narrow ones. */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 24rem;
+  }
+
+  .side {
+    position: sticky;
+    top: calc(3.5rem + var(--space-4));
+  }
+}
+
+/* Dotted like graph paper; scrolls sideways when the branches are wider than the screen. */
+.canvas {
+  min-height: 24rem;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--card);
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--muted-foreground) 22%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+}
+
+.tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  min-width: 100%;
+  margin: 0 auto;
+}
+
+.start,
+.end {
+  padding: 2px var(--space-3);
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.line {
+  width: 1px;
+  height: var(--space-3);
+  background: var(--input);
+}
+
+.add {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--input);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    border-color 120ms,
+    color 120ms;
+}
+
+.add:hover:not(:disabled),
+.add[data-popup-open] {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.add:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.add:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.add svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.wait {
+  padding: 1px var(--space-2);
+  border: 1px dashed var(--input);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Each kind of step keeps its channel's colour, on its icon. */
+.node[data-kind="invitation"] {
+  --kind: var(--brand);
+}
+
+.node[data-kind="message"] {
+  --kind: var(--linkedin);
+}
+
+.node[data-kind="view"] {
+  --kind: var(--muted-foreground);
+}
+
+.node[data-kind="email"] {
+  --kind: var(--email);
+}
+
+.node[data-kind="condition"] {
+  --kind: var(--meeting);
+}
+
+.node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 15rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms;
+}
+
+.node[data-kind="condition"] {
+  border-color: color-mix(in srgb, var(--meeting) 45%, transparent);
+  background: color-mix(in srgb, var(--meeting) 8%, var(--background));
+}
+
+.node:hover {
+  border-color: var(--input);
+}
+
+.node:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.node.selected,
+.node.selected:hover {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+.node.invalid {
+  border-color: var(--destructive);
+}
+
+.nodeIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in srgb, var(--kind) 14%, transparent);
+  color: var(--kind);
+}
+
+.nodeIcon svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+.nodeText {
+  display: grid;
+  min-width: 0;
+}
+
+.nodeTitle,
+.nodeDetail {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.nodeTitle {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.nodeDetail {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.invalidDot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 2px solid var(--card);
+  border-radius: 999px;
+  background: var(--destructive);
+}
+
+/*
+ * Yes and No side by side. Each column draws half of the bar that joins them, so the bar
+ * runs from the middle of one to the middle of the other whatever their widths.
+ */
+.branches {
+  display: flex;
+  align-items: flex-start;
+  padding-top: var(--space-3);
+  position: relative;
+}
+
+.branches::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: var(--space-3);
+  background: var(--input);
+}
+
+.branch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--space-4);
+}
+
+.branch::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 1px;
+  background: var(--input);
+}
+
+/* A short drop from the bar to each answer. */
+.branch::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: var(--space-3);
+  background: var(--input);
+}
+
+.branch:first-child::before {
+  left: 50%;
+  right: 0;
+}
+
+.branch:last-child::before {
+  left: 0;
+  right: 50%;
+}
+
+.answer {
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.yes {
+  color: var(--email);
+}
+
+.no {
+  color: var(--destructive);
+}
+
+.menu {
+  min-width: 15rem;
+}
+
+.menuLabel {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.menuText {
+  display: grid;
+}
+
+.menuNote {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.side {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.error {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid color-mix(in oklch, var(--destructive), transparent 60%);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm);
+  color: var(--destructive);
+}

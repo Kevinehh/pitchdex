@@ -31,8 +31,32 @@ internal sealed class CampaignStepConfiguration : IEntityTypeConfiguration<Campa
         builder.HasKey(s => s.Id);
         builder.Property(s => s.Id).ValueGeneratedNever();
         builder.Property(s => s.Type).HasConversion<string>().HasMaxLength(30);
+        builder.Property(s => s.Branch).HasConversion<string>().HasMaxLength(3);
         builder.Property(s => s.Subject).HasMaxLength(300);
-        builder.HasIndex(s => new { s.CampaignId, s.Position }).IsUnique();
+
+        // Not unique: positions shift as steps are inserted, and a save updates them one row at a time.
+        builder.HasIndex(s => new { s.CampaignId, s.Position });
+
+        // The parent is checked when the campaign is saved, not by the database, so a save can
+        // re-parent and remove steps in any order.
+        builder.HasIndex(s => s.ParentStepId);
+    }
+}
+
+internal sealed class ProfileViewConfiguration : IEntityTypeConfiguration<ProfileView>
+{
+    public void Configure(EntityTypeBuilder<ProfileView> builder)
+    {
+        builder.HasKey(v => v.Id);
+        builder.Property(v => v.Id).ValueGeneratedNever();
+
+        builder.HasOne<Lead>().WithMany().HasForeignKey(v => v.LeadId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<ConnectedAccount>().WithMany().HasForeignKey(v => v.AccountId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Enrollment>().WithMany().HasForeignKey(v => v.EnrollmentId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasOne<CampaignStep>().WithMany().HasForeignKey(v => v.CampaignStepId).OnDelete(DeleteBehavior.SetNull);
+
+        // The daily limit asks: how many views from this account since yesterday?
+        builder.HasIndex(v => new { v.AccountId, v.ViewedAt });
     }
 }
 
@@ -47,6 +71,9 @@ internal sealed class EnrollmentConfiguration : IEntityTypeConfiguration<Enrollm
 
         builder.HasOne<Campaign>().WithMany().HasForeignKey(e => e.CampaignId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Lead>().WithMany().HasForeignKey(e => e.LeadId).OnDelete(DeleteBehavior.Cascade);
+
+        // Saving the campaign moves enrollments off removed steps first; this is only a backstop.
+        builder.HasOne<CampaignStep>().WithMany().HasForeignKey(e => e.NextStepId).OnDelete(DeleteBehavior.SetNull);
 
         // A lead is enrolled in a campaign once.
         builder.HasIndex(e => new { e.CampaignId, e.LeadId }).IsUnique();

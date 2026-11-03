@@ -129,6 +129,10 @@ public sealed class PracticeMessagingProvider(MessagingSettings settings, TimePr
     }
 
     /// <summary>A pretend profile with no picture, so the initials fallback can be tried too.</summary>
+    /// <summary>Practice leads aren't real people, so nobody is told; it returns the same made-up profile.</summary>
+    public Task<LinkedInPerson> ViewProfileAsync(string accountExternalId, string identifier, CancellationToken ct) =>
+        GetProfileAsync(accountExternalId, identifier, withBackground: false, ct);
+
     public Task<LinkedInPerson> GetProfileAsync(string accountExternalId, string identifier, bool withBackground, CancellationToken ct)
     {
         var providerId = identifier.StartsWith(ProfilePrefix, StringComparison.Ordinal) ? identifier : ProfilePrefix + identifier;

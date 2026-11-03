@@ -30,6 +30,8 @@ public interface IAppDbContext
 
     DbSet<Meeting> Meetings { get; }
 
+    DbSet<ProfileView> ProfileViews { get; }
+
     DbSet<Workspace> Workspaces { get; }
 
     DbSet<WorkspaceMember> WorkspaceMembers { get; }

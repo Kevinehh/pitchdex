@@ -75,13 +75,20 @@ internal sealed class UnipileClient(HttpClient http)
     /// <summary>
     /// A LinkedIn profile, looked up by the part of the link after /in/ or by its provider id.
     /// With sections, it also has a preview of their experience, education and About section.
+    /// With notify, LinkedIn tells the person their profile was viewed; Unipile's default is not to.
     /// </summary>
-    public Task<JsonDocument> GetUserProfileAsync(string accountId, string identifier, bool withSections, CancellationToken ct) =>
+    public Task<JsonDocument> GetUserProfileAsync(
+        string accountId,
+        string identifier,
+        bool withSections,
+        CancellationToken ct,
+        bool notify = false) =>
         SendAsync(
             new HttpRequestMessage(
                 HttpMethod.Get,
                 $"users/{Uri.EscapeDataString(identifier)}?account_id={Uri.EscapeDataString(accountId)}"
-                + (withSections ? "&linkedin_sections=*_preview" : "")),
+                + (withSections ? "&linkedin_sections=*_preview" : "")
+                + (notify ? "&notify=true" : "")),
             ct);
 
     public async Task SendInvitationAsync(string accountId, string providerId, string? note, CancellationToken ct)

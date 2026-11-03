@@ -1,0 +1,142 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+.header[data-kind="invitation"] {
+  --kind: var(--brand);
+}
+
+.header[data-kind="message"] {
+  --kind: var(--linkedin);
+}
+
+.header[data-kind="view"] {
+  --kind: var(--muted-foreground);
+}
+
+.header[data-kind="email"] {
+  --kind: var(--email);
+}
+
+.header[data-kind="condition"] {
+  --kind: var(--meeting);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in srgb, var(--kind) 14%, transparent);
+  color: var(--kind);
+}
+
+.icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.typeTrigger {
+  min-width: 11rem;
+}
+
+.number {
+  margin-left: auto;
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.body {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.days {
+  width: 4.5rem;
+  text-align: center;
+}
+
+.muted {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.inline .muted {
+  font-size: var(--text-sm);
+}
+
+.note {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+}
+
+.counter {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.counterOver {
+  color: var(--destructive);
+}
+
+.emailBody {
+  min-height: 12rem;
+}
+
+.shortBody {
+  min-height: 7rem;
+}
+
+/* Keeps its own colour when the field above turns red for an error. */
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--foreground);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--border);
+}

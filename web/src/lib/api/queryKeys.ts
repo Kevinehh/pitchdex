@@ -7,6 +7,8 @@ export const queryKeys = {
   calendly: ["calendly"],
   session: ["session"],
   campaigns: ["campaigns"],
+  // Separate from "campaigns": saving a campaign mustn't refetch the gallery.
+  campaignTemplates: ["campaign-templates"],
   dashboard: ["dashboard"],
   messages: ["messages"],
   investors: ["investors"],

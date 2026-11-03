@@ -318,6 +318,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/campaigns/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CampaignTemplate"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/campaigns/{id}": {
         parameters: {
             query?: never;
@@ -2450,6 +2485,12 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        CampaignTemplate: {
+            id: string;
+            name: string;
+            description: string;
+            steps: components["schemas"]["StepInput"][];
+        };
         ChangePasswordCommand: {
             currentPassword: string;
             newPassword: string;
@@ -2532,6 +2573,7 @@ export interface components {
         CreateCampaignCommand: {
             name: string;
             timeZoneId?: null | string;
+            templateId?: null | string;
         };
         CreateLeadCommand: {
             fullName: string;
@@ -2603,8 +2645,8 @@ export interface components {
             leadName: string;
             leadFirm: null | string;
             status: components["schemas"]["EnrollmentStatus"];
-            /** Format: int32 */
-            nextStepPosition: number;
+            /** Format: uuid */
+            nextStepId: null | string;
             /** Format: date-time */
             nextRunAt: null | string;
             lastError: null | string;
@@ -2924,26 +2966,38 @@ export interface components {
         StartConnectCommand: {
             channel: components["schemas"]["AccountChannel"];
         };
+        /** @enum {unknown} */
+        StepBranch: "Yes" | "No" | null;
         StepDto: {
             /** Format: uuid */
             id: string;
             /** Format: int32 */
             position: number;
+            /** Format: uuid */
+            parentStepId: null | string;
+            branch: null | components["schemas"]["StepBranch"];
             type: components["schemas"]["StepType"];
             /** Format: int32 */
             delayDays: number;
+            /** Format: int32 */
+            waitDays: number;
             subject: null | string;
             body: string;
         };
         StepInput: {
+            key: string;
+            parentKey: null | string;
+            branch: null | components["schemas"]["StepBranch"];
             type: components["schemas"]["StepType"];
             /** Format: int32 */
             delayDays: number;
+            /** Format: int32 */
+            waitDays: number;
             subject: null | string;
             body: string;
         };
         /** @enum {unknown} */
-        StepType: "Email" | "LinkedInInvitation" | "LinkedInMessage";
+        StepType: "Email" | "LinkedInInvitation" | "LinkedInMessage" | "LinkedInProfileView" | "IfInvitationAccepted" | "IfHasEmail";
         UpdateAccountLimitsCommand: {
             limits: components["schemas"]["LimitInput"][];
         };

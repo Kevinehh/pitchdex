@@ -11,14 +11,16 @@ using Pitchdex.Domain.Messages;
 namespace Pitchdex.Application.Campaigns;
 
 /// <param name="Skipped">LinkedIn message steps passed over because the connection request was never accepted.</param>
-public sealed record SequenceRunResult(int Sent, int Waiting, int Finished, int Skipped);
+/// <param name="Branched">Conditions answered, sending the lead down their Yes or No branch.</param>
+public sealed record SequenceRunResult(int Sent, int Waiting, int Finished, int Skipped, int Branched);
 
 /// <summary>
 /// The sequence engine. Runs every minute: finds active enrollments whose next step is
 /// due and, for each one, checks the sending hours, the account's daily limits and
-/// whether the lead has replied, then sends the step and schedules the next.
+/// whether the lead has replied, then does the step and schedules the next. A condition
+/// step sends nothing: it answers its question and moves the lead down its Yes or No branch.
 ///
-/// Pacing: each account sends at most one step per run, so a batch goes out spread over
+/// Pacing: each account does at most one step per run, so a batch goes out spread over
 /// minutes rather than all at once, with a few random minutes added between steps.
 ///
 /// Runs in a single API instance for the MVP. With several instances, claim enrollments
@@ -41,6 +43,7 @@ public sealed class RunDueStepsHandler(
         Waiting,
         Finished,
         Skipped,
+        Branched,
     }
 
     public async Task<SequenceRunResult> Handle(CancellationToken ct)
@@ -55,7 +58,7 @@ public sealed class RunDueStepsHandler(
 
         if (due.Count == 0)
         {
-            return new SequenceRunResult(0, 0, 0, 0);
+            return new SequenceRunResult(0, 0, 0, 0, 0);
         }
 
         var campaignIds = due.Select(e => e.CampaignId).Distinct().ToList();
@@ -71,7 +74,7 @@ public sealed class RunDueStepsHandler(
             .FirstOrDefaultAsync(ct);
 
         var accountsUsedThisRun = new HashSet<Guid>();
-        int sent = 0, waiting = 0, finished = 0, skipped = 0;
+        int sent = 0, waiting = 0, finished = 0, skipped = 0, branched = 0;
 
         foreach (var enrollment in due)
         {
@@ -81,6 +84,7 @@ public sealed class RunDueStepsHandler(
                 case Outcome.Sent: sent++; break;
                 case Outcome.Waiting: waiting++; break;
                 case Outcome.Skipped: skipped++; break;
+                case Outcome.Branched: branched++; break;
                 default: finished++; break;
             }
 
@@ -93,7 +97,7 @@ public sealed class RunDueStepsHandler(
             logger.LogInformation("Sequence engine sent {Sent} steps ({Waiting} waiting, {Finished} finished)", sent, waiting, finished);
         }
 
-        return new SequenceRunResult(sent, waiting, finished, skipped);
+        return new SequenceRunResult(sent, waiting, finished, skipped, branched);
     }
 
     private async Task<Outcome> RunOneAsync(
@@ -103,8 +107,8 @@ public sealed class RunDueStepsHandler(
         DateTimeOffset now,
         CancellationToken ct)
     {
-        var steps = campaign.Steps.OrderBy(s => s.Position).ToList();
-        if (enrollment.NextStepPosition >= steps.Count)
+        var step = campaign.Steps.FirstOrDefault(s => s.Id == enrollment.NextStepId);
+        if (step is null)
         {
             enrollment.Finish(EnrollmentStatus.Completed);
             return Outcome.Finished;
@@ -121,12 +125,17 @@ public sealed class RunDueStepsHandler(
                 return Outcome.Finished;
         }
 
+        // Conditions send nothing, so they don't wait for sending hours or count against limits.
+        if (step.Type.IsCondition())
+        {
+            return await DecideAsync(enrollment, campaign, step, lead, now, ct);
+        }
+
         if (!SendingWindow.IsOpen(campaign, now))
         {
             return Wait(enrollment, SendingWindow.NextOpening(campaign, now).AddMinutes(Random.Shared.Next(0, 20)), reason: null);
         }
 
-        var step = steps[enrollment.NextStepPosition];
         var account = await SenderAsync(campaign, step, ct);
         if (account is null)
         {
@@ -135,7 +144,7 @@ public sealed class RunDueStepsHandler(
                 : "Waiting for a connected LinkedIn account. Choose one in the campaign's settings.");
         }
 
-        if (step.Type == StepType.LinkedInMessage && await AwaitingAcceptanceAsync(enrollment, steps, lead, account, now, ct) is { } held)
+        if (step.Type == StepType.LinkedInMessage && await AwaitingAcceptanceAsync(enrollment, campaign, step, lead, account, now, ct) is { } held)
         {
             return held;
         }
@@ -145,34 +154,52 @@ public sealed class RunDueStepsHandler(
             return Wait(enrollment, now.AddMinutes(Random.Shared.Next(1, 5)), reason: null);
         }
 
-        var kind = SendingLimits.KindOf(step.Type);
-        if (!await SendingQuota.HasRoomAsync(db, account, kind, now, ct))
+        var source = new CampaignSource(enrollment.Id, step.Id);
+        try
         {
-            return Wait(enrollment, now.AddHours(1), $"Waiting: {SendingQuota.LimitReachedMessage(account, kind)}");
+            if (step.Type == StepType.LinkedInProfileView)
+            {
+                if (await ViewLimitReachedAsync(account, now, ct))
+                {
+                    return Wait(enrollment, now.AddHours(1),
+                        $"Waiting: {account.DisplayName} has viewed {SendingLimits.ProfileViewsPerDay} profiles in the last 24 hours.");
+                }
+
+                // A view that happened but wasn't recorded as done (say, the API stopped) isn't repeated.
+                if (!await db.ProfileViews.AnyAsync(v => v.EnrollmentId == enrollment.Id && v.CampaignStepId == step.Id, ct))
+                {
+                    await messenger.ViewLinkedInProfileAsync(lead, account, source, ct);
+                    accountsUsedThisRun.Add(account.Id);
+                }
+            }
+            else
+            {
+                var kind = SendingLimits.KindOf(step.Type);
+                if (!await SendingQuota.HasRoomAsync(db, account, kind, now, ct))
+                {
+                    return Wait(enrollment, now.AddHours(1), $"Waiting: {SendingQuota.LimitReachedMessage(account, kind)}");
+                }
+
+                // A send that went out but wasn't recorded as done (say, the API stopped) isn't repeated.
+                if (!await db.Messages.AnyAsync(m => m.EnrollmentId == enrollment.Id && m.CampaignStepId == step.Id, ct))
+                {
+                    await SendAsync(lead, account, step, source, ct);
+                    accountsUsedThisRun.Add(account.Id);
+                }
+            }
+        }
+        catch (UseCaseException ex)
+        {
+            // Something only the founder can fix, like a lead with no LinkedIn link.
+            enrollment.Finish(EnrollmentStatus.Failed, ex.Message);
+            return Outcome.Finished;
+        }
+        catch (ProviderException ex)
+        {
+            return Retry(enrollment, now, ex.Message);
         }
 
-        // A send that went out but wasn't recorded as done (say, the API stopped) isn't repeated.
-        var alreadySent = await db.Messages.AnyAsync(m => m.EnrollmentId == enrollment.Id && m.CampaignStepId == step.Id, ct);
-        if (!alreadySent)
-        {
-            try
-            {
-                await SendAsync(lead, account, step, new CampaignSource(enrollment.Id, step.Id), ct);
-                accountsUsedThisRun.Add(account.Id);
-            }
-            catch (UseCaseException ex)
-            {
-                // Something only the founder can fix, like a lead with no LinkedIn link.
-                enrollment.Finish(EnrollmentStatus.Failed, ex.Message);
-                return Outcome.Finished;
-            }
-            catch (ProviderException ex)
-            {
-                return Retry(enrollment, now, ex.Message);
-            }
-        }
-
-        return Advance(enrollment, steps, now);
+        return Advance(enrollment, campaign, step, branch: null, now);
     }
 
     private async Task SendAsync(Lead lead, ConnectedAccount account, CampaignStep step, CampaignSource source, CancellationToken ct)
@@ -189,6 +216,56 @@ public sealed class RunDueStepsHandler(
         }
     }
 
+    /// <summary>Answers a condition and moves the lead down its Yes or No branch, or waits for the answer.</summary>
+    private async Task<Outcome> DecideAsync(
+        Enrollment enrollment,
+        Campaign campaign,
+        CampaignStep step,
+        Lead lead,
+        DateTimeOffset now,
+        CancellationToken ct)
+    {
+        if (step.Type == StepType.IfHasEmail)
+        {
+            Advance(enrollment, campaign, step, string.IsNullOrWhiteSpace(lead.Email) ? StepBranch.No : StepBranch.Yes, now);
+            return Outcome.Branched;
+        }
+
+        var invitation = await InvitationAsync(enrollment, campaign, lead, ct);
+
+        // No request on record means LinkedIn turned it down because they're already a
+        // connection, the very thing the condition asks for.
+        if (invitation is null || invitation.AcceptedAt is not null)
+        {
+            Advance(enrollment, campaign, step, StepBranch.Yes, now);
+            return Outcome.Branched;
+        }
+
+        if (now - invitation.SentAt >= TimeSpan.FromDays(step.WaitDays))
+        {
+            Advance(enrollment, campaign, step, StepBranch.No, now);
+            return Outcome.Branched;
+        }
+
+        // Acceptance is checked every few minutes, so a short recheck moves on soon after.
+        return Wait(enrollment, now.AddMinutes(30),
+            $"Waiting up to {step.WaitDays} days for {FirstName(lead)} to accept your connection request.");
+    }
+
+    /// <summary>
+    /// The latest connection request to the lead: the one this enrollment sent, or failing that
+    /// one from the campaign's LinkedIn account.
+    /// </summary>
+    private Task<Message?> InvitationAsync(Enrollment enrollment, Campaign campaign, Lead lead, CancellationToken ct) =>
+        db.Messages
+            .Where(m => m.LeadId == lead.Id &&
+                m.Kind == MessageKind.LinkedInInvitation &&
+                m.Direction == MessageDirection.Outbound &&
+                (m.EnrollmentId == enrollment.Id || m.AccountId == campaign.LinkedInAccountId))
+            .OrderByDescending(m => m.EnrollmentId == enrollment.Id)
+            .ThenByDescending(m => m.SentAt)
+            .FirstOrDefaultAsync(ct);
+
     /// <summary>
     /// A LinkedIn message only reaches a connection, so it waits while this account's
     /// connection request to the lead is pending, and is skipped once the request has gone
@@ -197,7 +274,8 @@ public sealed class RunDueStepsHandler(
     /// </summary>
     private async Task<Outcome?> AwaitingAcceptanceAsync(
         Enrollment enrollment,
-        List<CampaignStep> steps,
+        Campaign campaign,
+        CampaignStep step,
         Lead lead,
         ConnectedAccount account,
         DateTimeOffset now,
@@ -217,19 +295,23 @@ public sealed class RunDueStepsHandler(
             return null;
         }
 
-        var firstName = lead.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? lead.FullName;
         if (now - invitation.SentAt < SendingLimits.InvitationAcceptanceWindow)
         {
-            // Acceptance is checked every few minutes, so a short recheck sends soon after.
-            return Wait(enrollment, now.AddMinutes(30), $"Waiting for {firstName} to accept your connection request.");
+            return Wait(enrollment, now.AddMinutes(30), $"Waiting for {FirstName(lead)} to accept your connection request.");
         }
 
-        var skippedStep = enrollment.NextStepPosition + 1;
-        Advance(enrollment, steps, now);
+        Advance(enrollment, campaign, step, branch: null, now);
         enrollment.LastError =
-            $"Skipped step {skippedStep}: {firstName} didn't accept the connection request within " +
+            $"Skipped step {step.Position + 1}: {FirstName(lead)} didn't accept the connection request within " +
             $"{SendingLimits.InvitationAcceptanceWindow.TotalDays:0} days.";
         return Outcome.Skipped;
+    }
+
+    private async Task<bool> ViewLimitReachedAsync(ConnectedAccount account, DateTimeOffset now, CancellationToken ct)
+    {
+        var since = now.AddHours(-24);
+        var views = await db.ProfileViews.CountAsync(v => v.AccountId == account.Id && v.ViewedAt > since, ct);
+        return views >= SendingLimits.ProfileViewsPerDay;
     }
 
     /// <summary>The campaign's sender for this kind of step, if it's connected.</summary>
@@ -241,20 +323,24 @@ public sealed class RunDueStepsHandler(
             : await db.ConnectedAccounts.FirstOrDefaultAsync(a => a.Id == accountId && a.Status == AccountStatus.Connected, ct);
     }
 
-    private static Outcome Advance(Enrollment enrollment, List<CampaignStep> steps, DateTimeOffset now)
+    /// <summary>
+    /// Moves the lead to the step after <paramref name="from"/>, on the given branch after a
+    /// condition, and schedules it. With nothing after it, the lead has finished the sequence.
+    /// </summary>
+    private static Outcome Advance(Enrollment enrollment, Campaign campaign, CampaignStep from, StepBranch? branch, DateTimeOffset now)
     {
-        enrollment.NextStepPosition++;
         enrollment.Attempts = 0;
         enrollment.LastError = null;
 
-        if (enrollment.NextStepPosition >= steps.Count)
+        var next = SequenceTree.Next(campaign.Steps, from, branch);
+        enrollment.NextStepId = next?.Id;
+        if (next is null)
         {
             enrollment.Finish(EnrollmentStatus.Completed);
             return Outcome.Sent;
         }
 
         // A few random minutes on top of the delay, so follow-ups don't land at the same time every day.
-        var next = steps[enrollment.NextStepPosition];
         enrollment.NextRunAt = now.AddDays(next.DelayDays).AddMinutes(Random.Shared.Next(2, 45));
         return Outcome.Sent;
     }
@@ -278,4 +364,7 @@ public sealed class RunDueStepsHandler(
 
         return Wait(enrollment, now.AddMinutes(15 * enrollment.Attempts), $"Retrying: {error}");
     }
+
+    private static string FirstName(Lead lead) =>
+        lead.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? lead.FullName;
 }

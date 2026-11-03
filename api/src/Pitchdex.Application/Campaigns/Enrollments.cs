@@ -30,7 +30,8 @@ public sealed class EnrollLeadsHandler(IAppDbContext db, TimeProvider clock)
     public async Task<EnrollResult> Handle(EnrollLeadsCommand command, CancellationToken ct)
     {
         var campaign = await CampaignQueries.LoadAsync(db, command.CampaignId, ct);
-        var hasLinkedInSteps = campaign.Steps.Any(s => s.Type != StepType.Email);
+        var hasLinkedInSteps = campaign.Steps.Any(s => s.Type.UsesLinkedIn());
+        var firstStep = SequenceTree.First(campaign.Steps);
 
         var requested = command.LeadIds.Distinct().ToList();
         var leads = await db.Leads.Where(l => requested.Contains(l.Id)).ToListAsync(ct);
@@ -53,6 +54,7 @@ public sealed class EnrollLeadsHandler(IAppDbContext db, TimeProvider clock)
             {
                 CampaignId = campaign.Id,
                 LeadId = lead.Id,
+                NextStepId = firstStep?.Id,
                 NextRunAt = clock.GetUtcNow(),
             });
             enrolled++;
@@ -68,13 +70,14 @@ public sealed class EnrollLeadsHandler(IAppDbContext db, TimeProvider clock)
     }
 }
 
+/// <param name="NextStepId">The step the lead is on next. Empty once they reached the end of a branch.</param>
 public sealed record EnrollmentDto(
     Guid Id,
     Guid LeadId,
     string LeadName,
     string? LeadFirm,
     EnrollmentStatus Status,
-    int NextStepPosition,
+    Guid? NextStepId,
     DateTimeOffset? NextRunAt,
     string? LastError,
     DateTimeOffset UpdatedAt);
@@ -117,7 +120,7 @@ public sealed class ListEnrollmentsHandler(IAppDbContext db)
             .Take(query.PageSize)
             .Select(x => new EnrollmentDto(
                 x.e.Id, x.l.Id, x.l.FullName, x.l.Firm, x.e.Status,
-                x.e.NextStepPosition, x.e.NextRunAt, x.e.LastError, x.e.UpdatedAt))
+                x.e.NextStepId, x.e.NextRunAt, x.e.LastError, x.e.UpdatedAt))
             .ToListAsync(ct);
 
         return new Paged<EnrollmentDto>(items, total, query.Page, query.PageSize);
