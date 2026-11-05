@@ -1,0 +1,143 @@
+# Pushing to main deploys to test. Production only deploys when someone runs this workflow by hand
+# and chooses it. AWS setup and the GitHub variables this reads are in infra/README.md.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Where to deploy
+        type: choice
+        options: [test, production]
+        default: test
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-${{ inputs.environment || 'test' }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build -c Release
+        working-directory: api
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npm run lint
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'test' }}
+    env:
+      ENVIRONMENT: ${{ inputs.environment || 'test' }}
+      CLUSTER: pitchdex-${{ inputs.environment || 'test' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push the API image
+        id: image
+        working-directory: api
+        run: |
+          image="${{ steps.ecr.outputs.registry }}/$CLUSTER-api:${{ github.sha }}"
+          docker build -t "$image" .
+          docker push "$image"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Register task definitions with the new image
+        id: tasks
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          register() {
+            aws ecs describe-task-definition --task-definition "$1" --query taskDefinition \
+              | jq --arg image "$IMAGE" '.containerDefinitions[0].image = $image
+                  | {family, taskRoleArn, executionRoleArn, networkMode, containerDefinitions, requiresCompatibilities, cpu, memory}' \
+              > task-definition.json
+            aws ecs register-task-definition --cli-input-json file://task-definition.json \
+              --query taskDefinition.taskDefinitionArn --output text
+          }
+          echo "api=$(register "$CLUSTER-api")" >> "$GITHUB_OUTPUT"
+          # Test runs the workers inside the API, so only production has a worker to update.
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "worker=$(register "$CLUSTER-worker")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update the database
+        env:
+          TASK_DEFINITION: ${{ steps.tasks.outputs.api }}
+        run: |
+          network=$(aws ecs describe-services --cluster "$CLUSTER" --services api \
+            --query 'services[0].networkConfiguration' --output json)
+          task=$(aws ecs run-task --cluster "$CLUSTER" --launch-type FARGATE \
+            --task-definition "$TASK_DEFINITION" \
+            --network-configuration "$network" \
+            --overrides '{"containerOverrides":[{"name":"api","command":["dotnet","Pitchdex.Api.dll","migrate"]}]}' \
+            --query 'tasks[0].taskArn' --output text)
+          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$task"
+          code=$(aws ecs describe-tasks --cluster "$CLUSTER" --tasks "$task" \
+            --query 'tasks[0].containers[0].exitCode' --output text)
+          if [ "$code" != "0" ]; then
+            echo "::error::The migration failed with exit code $code. Nothing was deployed. See the logs in CloudWatch."
+            exit 1
+          fi
+
+      - name: Deploy the API and worker
+        env:
+          API_TASK: ${{ steps.tasks.outputs.api }}
+          WORKER_TASK: ${{ steps.tasks.outputs.worker }}
+        run: |
+          aws ecs update-service --cluster "$CLUSTER" --service api --task-definition "$API_TASK" > /dev/null
+          services="api"
+          if [ -n "$WORKER_TASK" ]; then
+            aws ecs update-service --cluster "$CLUSTER" --service worker --task-definition "$WORKER_TASK" > /dev/null
+            services="api worker"
+          fi
+          aws ecs wait services-stable --cluster "$CLUSTER" --services $services
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build the web app
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload the web app
+        working-directory: web/dist
+        run: |
+          # File names under assets/ change with their contents, so they can be kept forever.
+          aws s3 sync assets "s3://${{ vars.WEB_BUCKET }}/assets" --cache-control "public,max-age=31536000,immutable"
+          # Everything else has a fixed name, so browsers must check for a new one.
+          aws s3 sync . "s3://${{ vars.WEB_BUCKET }}" --exclude "assets/*" --cache-control "no-cache" --delete
+          aws cloudfront create-invalidation --distribution-id "${{ vars.DISTRIBUTION_ID }}" --paths "/*" > /dev/null

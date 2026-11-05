@@ -3,7 +3,8 @@ using Pitchdex.Application.Workspaces;
 
 namespace Pitchdex.Api.Auth;
 
-public sealed record UserDto(Guid Id, string Email, string FirstName, string LastName);
+/// <param name="SeenTips">The page banners and tour they've closed.</param>
+public sealed record UserDto(Guid Id, string Email, string FirstName, string LastName, IReadOnlyList<string> SeenTips);
 
 /// <summary>Who is signed in, and the workspace they're working in.</summary>
 public sealed record SessionDto(UserDto User, WorkspaceDto Workspace);

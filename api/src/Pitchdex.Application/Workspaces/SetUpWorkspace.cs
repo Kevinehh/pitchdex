@@ -4,7 +4,11 @@ using Pitchdex.Domain.Workspaces;
 
 namespace Pitchdex.Application.Workspaces;
 
-public sealed record WorkspaceDto(Guid Id, string Name);
+/// <param name="OnboardedAt">Empty until the founder finishes or skips the onboarding survey.</param>
+public sealed record WorkspaceDto(Guid Id, string Name, DateTimeOffset? OnboardedAt)
+{
+    public static WorkspaceDto From(Workspace workspace) => new(workspace.Id, workspace.Name, workspace.OnboardedAt);
+}
 
 /// <summary>
 /// Gives a newly signed-up founder their workspace. The very first sign-up takes over the
@@ -27,7 +31,7 @@ public sealed class SetUpWorkspaceHandler(IAppDbContext db)
         db.WorkspaceMembers.Add(new WorkspaceMember { WorkspaceId = workspace.Id, UserId = userId, Role = WorkspaceRole.Owner });
         await db.SaveChangesAsync(ct);
 
-        return new WorkspaceDto(workspace.Id, workspace.Name);
+        return WorkspaceDto.From(workspace);
     }
 }
 
@@ -38,6 +42,6 @@ public sealed class FindUserWorkspaceHandler(IAppDbContext db)
         await db.WorkspaceMembers
             .Where(m => m.UserId == userId)
             .OrderBy(m => m.CreatedAt)
-            .Join(db.Workspaces, m => m.WorkspaceId, w => w.Id, (m, w) => new WorkspaceDto(w.Id, w.Name))
+            .Join(db.Workspaces, m => m.WorkspaceId, w => w.Id, (m, w) => new WorkspaceDto(w.Id, w.Name, w.OnboardedAt))
             .FirstOrDefaultAsync(ct);
 }

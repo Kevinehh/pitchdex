@@ -19,4 +19,10 @@ public sealed class AppUser : IdentityUser<Guid>
     public string LastName { get; set; } = "";
 
     public DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>
+    /// The page banners and tour this founder has closed, by id ("tour", "campaigns"…), so
+    /// they stay closed on every device.
+    /// </summary>
+    public List<string> SeenTips { get; set; } = [];
 }

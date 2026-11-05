@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Pitchdex.Api.Auth;
 using Pitchdex.Api.Errors;
 using Pitchdex.Api.Filters;
+using Pitchdex.Api.Hosting;
 using Pitchdex.Api.OpenApi;
 using Pitchdex.Api.Workers;
 using Pitchdex.Application;
@@ -27,12 +28,13 @@ if (builder.Environment.IsDevelopment())
 }
 
 // Email and LinkedIn go through Unipile when its key is set (keep it in user secrets),
-// otherwise through practice mode, which is only allowed locally.
+// otherwise through practice mode, which is only allowed locally and on the test environment
+// (Staging), so testing there can't reach real investors.
 var messaging = builder.Configuration.GetSection(MessagingSettings.Section).Get<MessagingSettings>()
     ?? new MessagingSettings();
-if (!messaging.UsesUnipile && !builder.Environment.IsDevelopment())
+if (!messaging.UsesUnipile && !builder.Environment.IsDevelopment() && !builder.Environment.IsStaging())
 {
-    throw new InvalidOperationException("Messaging:UnipileBaseUrl and Messaging:UnipileApiKey must be set outside Development.");
+    throw new InvalidOperationException("Messaging:UnipileBaseUrl and Messaging:UnipileApiKey must be set in Production.");
 }
 
 // Unipile reports new accounts to a webhook, which needs this API's public address and a secret.
@@ -46,6 +48,14 @@ if (messaging.UsesUnipile && (string.IsNullOrWhiteSpace(messaging.PublicApiUrl) 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(connectionString, sampleData, messaging);
 builder.Services.AddPitchdexAuth(builder.Environment);
+builder.Services.AddPasswordResetEmail(builder.Configuration, builder.Environment);
+builder.Services.AddKeyStorage(builder.Configuration, builder.Environment);
+
+var proxyHops = builder.Configuration.GetValue("Proxy:Hops", defaultValue: 0);
+if (proxyHops > 0)
+{
+    builder.Services.AddProxySupport(proxyHops);
+}
 
 // Background sending and syncing. Only one instance should run them, so extra API instances
 // (a second server, or a local test copy) set Workers:Enabled to false.
@@ -67,11 +77,22 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
 
+if (await Commands.TryRunAsync(args, app))
+{
+    return;
+}
+
 app.Logger.LogInformation(
     messaging.UsesUnipile
         ? "Messaging: Unipile at {Url}"
         : "Messaging: practice mode (no Unipile key set). Accounts and replies are simulated.",
     messaging.UnipileBaseUrl);
+
+// The visitor's real address comes first: the rate limiter below goes by it.
+if (proxyHops > 0)
+{
+    app.UseForwardedHeaders();
+}
 
 // Any unhandled error becomes a standard ProblemDetails JSON response.
 app.UseExceptionHandler();

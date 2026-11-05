@@ -86,6 +86,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, Workspa
             user.ToTable("users");
             user.Property(u => u.FirstName).HasMaxLength(100);
             user.Property(u => u.LastName).HasMaxLength(100);
+            user.Property(u => u.SeenTips).HasDefaultValueSql("'{}'");
         });
         modelBuilder.Entity<IdentityRole<Guid>>().ToTable("roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("user_roles");

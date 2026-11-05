@@ -1796,6 +1796,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CompleteOnboardingCommand"];
+                    "text/json": components["schemas"]["CompleteOnboardingCommand"];
+                    "application/*+json": components["schemas"]["CompleteOnboardingCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WorkspaceDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/calendly": {
         parameters: {
             query?: never;
@@ -2382,6 +2432,87 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/tips/{tip}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tip: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/tips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2512,6 +2643,14 @@ export interface components {
             min: number;
             /** Format: int64 */
             max: null | number;
+        };
+        CompleteOnboardingCommand: {
+            companyName?: null | string;
+            stage?: null | string;
+            raiseSize?: null | components["schemas"]["RaiseSize"];
+            industries?: null | string[];
+            geographies?: null | string[];
+            heardFrom?: null | components["schemas"]["HeardFrom"];
         };
         ConnectCalendlyCommand: {
             accessToken: string;
@@ -2668,6 +2807,8 @@ export interface components {
         ForgotPasswordCommand: {
             email: string;
         };
+        /** @enum {unknown} */
+        HeardFrom: "LinkedIn" | "Search" | "Friend" | "Community" | "Media" | "Other" | null;
         InboxSyncResult: {
             /** Format: int32 */
             accountsChecked: number;
@@ -2884,6 +3025,8 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        /** @enum {unknown} */
+        RaiseSize: "Under500K" | "From500KTo2M" | "From2MTo5M" | "From5MTo15M" | "Over15M" | null;
         ReplyCommand: {
             channel: components["schemas"]["AccountChannel"];
             body: string;
@@ -3046,6 +3189,7 @@ export interface components {
             email: string;
             firstName: string;
             lastName: string;
+            seenTips: string[];
         };
         ValidationProblemDetails: {
             type?: null | string;
@@ -3070,6 +3214,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            /** Format: date-time */
+            onboardedAt: null | string;
         };
     };
     responses: never;

@@ -1,0 +1,294 @@
+/* A page of its own, without the app's sidebar: just the brand, the question and the way out. */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .top {
+    padding: var(--space-5) var(--space-8);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.progress {
+  height: 3px;
+  background: var(--border);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  transition: width 300ms ease;
+}
+
+.main {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: var(--space-8) var(--space-4) calc(var(--space-8) * 1.5);
+}
+
+.question,
+.matches {
+  width: min(36rem, 100%);
+  animation: enter 250ms ease both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+.count {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.hint {
+  margin: var(--space-2) 0 var(--space-6);
+  color: var(--muted-foreground);
+}
+
+.text {
+  height: 2.75rem;
+  font-size: var(--text-base);
+}
+
+.choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3rem;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 120ms,
+    background-color 120ms;
+}
+
+.choice:hover {
+  border-color: var(--input);
+}
+
+.choice:focus-visible,
+.chip:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.choiceIcon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--muted-foreground);
+}
+
+.choiceLabel {
+  flex: 1;
+}
+
+.key {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.key svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.choice.chosen,
+.choice.chosen:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.choice.chosen .choiceIcon,
+.choice.chosen .key {
+  color: var(--brand);
+}
+
+.choice.chosen .key {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--background);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--card-foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--input);
+}
+
+.chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.chip svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.chip.chosen {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.error {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-sm);
+  color: var(--destructive);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.next {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The keyboard hint only helps with a keyboard, so phones don't show it. */
+.enter {
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.enter svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .enter {
+    display: inline-flex;
+  }
+}
+
+.matches {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.matchIcon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.matchIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.matchActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.note {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question,
+  .matches {
+    animation: none;
+  }
+
+  .progress span {
+    transition: none;
+  }
+}

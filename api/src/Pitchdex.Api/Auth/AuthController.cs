@@ -1,9 +1,11 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Pitchdex.Application.Workspaces;
 using Pitchdex.Infrastructure.Identity;
 using Pitchdex.Infrastructure.Messaging;
@@ -18,7 +20,7 @@ namespace Pitchdex.Api.Auth;
 [ApiController]
 [Route("api/auth")]
 [Produces("application/json")]
-public sealed class AuthController(UserManager<AppUser> users, SignInManager<AppUser> signIn) : ControllerBase
+public sealed partial class AuthController(UserManager<AppUser> users, SignInManager<AppUser> signIn) : ControllerBase
 {
     /// <summary>One message for a wrong email or password, so it doesn't reveal which accounts exist.</summary>
     private const string WrongCredentials = "That email and password don't match an account.";
@@ -220,7 +222,54 @@ public sealed class AuthController(UserManager<AppUser> users, SignInManager<App
             : new SessionDto(ToDto(user), workspace);
     }
 
-    private static UserDto ToDto(AppUser user) => new(user.Id, user.Email ?? "", user.FirstName, user.LastName);
+    /// <summary>Closes a page banner, or the tour, for good. Closing one twice is fine.</summary>
+    [HttpPut("tips/{tip}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> MarkTipSeen(string tip, [FromServices] AppDbContext db, CancellationToken ct)
+    {
+        if (!TipId().IsMatch(tip))
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Unknown tip", detail: "Tip ids are short lowercase words.");
+        }
+
+        if (!Guid.TryParse(users.GetUserId(User), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        // One statement, so two banners closed at once can't overwrite each other. The cap keeps
+        // a misbehaving client from growing the list without end.
+        await db.Database.ExecuteSqlAsync(
+            $"""
+            UPDATE users SET seen_tips = array_append(seen_tips, {tip})
+            WHERE id = {userId} AND NOT ({tip} = ANY (seen_tips)) AND cardinality(seen_tips) < {MaxSeenTips}
+            """,
+            ct);
+        return NoContent();
+    }
+
+    /// <summary>Brings back the tour and every page banner.</summary>
+    [HttpDelete("tips")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ResetTips([FromServices] AppDbContext db, CancellationToken ct)
+    {
+        if (!Guid.TryParse(users.GetUserId(User), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        await db.Database.ExecuteSqlAsync($"UPDATE users SET seen_tips = '{{}}' WHERE id = {userId}", ct);
+        return NoContent();
+    }
+
+    private const int MaxSeenTips = 50;
+
+    [GeneratedRegex("^[a-z][a-z-]{0,39}$")]
+    private static partial Regex TipId();
+
+    private static UserDto ToDto(AppUser user) =>
+        new(user.Id, user.Email ?? "", user.FirstName, user.LastName, user.SeenTips);
 
     /// <summary>Identity's errors as field errors the forms can show next to the right input.</summary>
     private ActionResult IdentityProblem(IdentityResult result, string passwordField)

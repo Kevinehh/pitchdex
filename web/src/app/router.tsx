@@ -2,7 +2,7 @@ import type { ComponentType } from "react"
 import { createBrowserRouter } from "react-router"
 import { AppLoading } from "@/app/AppLoading"
 import { RouteError } from "@/app/RouteError"
-import { redirectIfSignedIn, requireSession } from "@/app/sessionLoaders"
+import { redirectIfSignedIn, requireNotOnboarded, requireOnboarded } from "@/app/sessionLoaders"
 import { AppLayout } from "@/layouts/AppLayout"
 import { AuthLayout } from "@/layouts/AuthLayout"
 
@@ -48,9 +48,18 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    // Everything else needs a signed-in founder; without one, the loader sends them to sign in.
+    // The survey straight after sign-up, full screen, before the app's own pages.
+    path: "welcome",
+    loader: requireNotOnboarded,
+    lazy: page(() => import("@/pages/WelcomePage")),
+    hydrateFallbackElement: <AppLoading />,
+    errorElement: <RouteError />,
+  },
+  {
+    // Everything else needs a signed-in founder who has been through the survey; the loader
+    // sends anyone else to sign in, or to the survey.
     element: <AppLayout />,
-    loader: requireSession,
+    loader: requireOnboarded,
     hydrateFallbackElement: <AppLoading />,
     errorElement: <RouteError />,
     children: [

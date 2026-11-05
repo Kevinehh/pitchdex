@@ -19,7 +19,7 @@ export function SetupPrompt() {
   const done = steps.filter((step) => step.done).length
 
   return (
-    <Link to={next.to} className={styles.prompt}>
+    <Link to={next.to} className={styles.prompt} data-tour="setup">
       <span className={styles.progress}>
         Get set up · {done} of {steps.length}
       </span>

@@ -4,6 +4,9 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Amazon.AspNetCore.DataProtection.SSM" Version="4.0.3" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.10" />
+    <PackageVersion Include="AWSSDK.SimpleEmailV2" Version="4.0.106.9" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />

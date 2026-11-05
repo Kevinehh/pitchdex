@@ -25,6 +25,16 @@ public sealed class SettingsController : ControllerBase
         CancellationToken ct) =>
         handler.Handle(command, ct);
 
+    /// <summary>Saves the onboarding survey, or marks it skipped when no answers are sent.</summary>
+    [HttpPut("onboarding")]
+    [ProducesResponseType<WorkspaceDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public Task<WorkspaceDto> CompleteOnboarding(
+        CompleteOnboardingCommand command,
+        [FromServices] CompleteOnboardingHandler handler,
+        CancellationToken ct) =>
+        handler.Handle(command, ct);
+
     [HttpGet("calendly")]
     [ProducesResponseType<CalendlySettingsDto>(StatusCodes.Status200OK)]
     public Task<CalendlySettingsDto> GetCalendly([FromServices] GetCalendlySettingsHandler handler, CancellationToken ct) =>

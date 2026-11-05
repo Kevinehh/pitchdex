@@ -4,9 +4,9 @@ using Pitchdex.Application.Common;
 namespace Pitchdex.Infrastructure.Security;
 
 /// <summary>
-/// Encrypts with ASP.NET Data Protection, the same keys that protect sign-in cookies. In
-/// production the keys must be kept somewhere that outlives a deploy (a database table or a
-/// key vault), or every saved token stops working on the next release.
+/// Encrypts with ASP.NET Data Protection, the same keys that protect sign-in cookies. On AWS
+/// the keys are kept in Parameter Store (see the API's HostingSetup), so saved tokens keep
+/// working after a deploy.
 /// </summary>
 internal sealed class DataProtectionSecretProtector(IDataProtectionProvider provider) : ISecretProtector
 {

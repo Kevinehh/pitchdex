@@ -1,0 +1,103 @@
+/* Above the top bar, menus and dialogs. */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+/* Catches clicks, so the page can't be used mid-tour. */
+.blocker {
+  position: absolute;
+  inset: 0;
+}
+
+.dim {
+  background: var(--scrim);
+}
+
+/* A ring around the element; its huge shadow dims everything else. */
+.spotlight {
+  position: fixed;
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 2px var(--brand),
+    0 0 0 100vmax var(--scrim);
+  pointer-events: none;
+  transition:
+    top 200ms ease,
+    left 200ms ease,
+    width 200ms ease,
+    height 200ms ease;
+}
+
+.card {
+  position: fixed;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-popover);
+}
+
+.centered {
+  top: 50%;
+  left: 50%;
+  width: min(24rem, calc(100% - 2rem));
+  transform: translate(-50%, -50%);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.progress {
+  display: flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: width 150ms ease;
+}
+
+.dot.current {
+  width: 16px;
+  background: var(--brand);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight,
+  .dot {
+    transition: none;
+  }
+}

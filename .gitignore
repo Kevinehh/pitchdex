@@ -23,3 +23,9 @@ data/
 .env
 .env.*
 !.env.example
+
+# Terraform's working files and local state, which can hold secrets. The lock file stays in Git.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars

@@ -14,6 +14,11 @@ internal sealed class WorkspaceConfiguration : IEntityTypeConfiguration<Workspac
         builder.Property(w => w.Name).HasMaxLength(200);
         builder.Property(w => w.TimeZoneId).HasMaxLength(100);
         builder.Property(w => w.CalendlyUrl).HasMaxLength(500);
+        builder.Property(w => w.RaiseStage).HasMaxLength(50);
+        builder.Property(w => w.RaiseSize).HasConversion<string>().HasMaxLength(20);
+        builder.Property(w => w.HeardFrom).HasConversion<string>().HasMaxLength(20);
+        builder.Property(w => w.Industries).HasDefaultValueSql("'{}'");
+        builder.Property(w => w.InvestorGeographies).HasDefaultValueSql("'{}'");
 
         // Columns on the workspace row rather than a table of their own: one account each.
         builder.OwnsOne(w => w.Calendly, calendly =>

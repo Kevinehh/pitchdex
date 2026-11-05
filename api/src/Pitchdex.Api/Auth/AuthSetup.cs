@@ -86,7 +86,6 @@ public static class AuthSetup
         });
 
         services.AddScoped<WorkspaceMiddleware>();
-        services.AddSingleton<IPasswordResetSender, LoggedPasswordResetSender>();
         services.AddValidatorsFromAssemblyContaining<SignUpValidator>();
 
         return services;

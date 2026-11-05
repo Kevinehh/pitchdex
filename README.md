@@ -65,6 +65,10 @@ every 2 minutes, and the Inbox's **Check for replies** button does the same on d
 messages from leads are stored; the rest of a founder's mailbox is ignored. Once the app has
 a public address, Unipile webhooks can replace the polling.
 
+## Deploying
+
+Production and test run on AWS. The setup, first-time steps and investor imports are in [infra/README.md](infra/README.md).
+
 ## How the code is organized
 
 ```

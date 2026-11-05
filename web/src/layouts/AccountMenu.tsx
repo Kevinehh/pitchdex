@@ -1,4 +1,13 @@
-import { ChevronDown, LogOut, Monitor, Moon, Settings, Sun, UserRound } from "lucide-react"
+import {
+  ChevronDown,
+  Lightbulb,
+  LogOut,
+  Monitor,
+  Moon,
+  Settings,
+  Sun,
+  UserRound,
+} from "lucide-react"
 import { useNavigate } from "react-router"
 import { Avatar } from "@/components/common/Avatar"
 import {
@@ -13,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useSession, useSignOut } from "@/features/auth"
+import { useResetTips } from "@/features/onboarding"
 import { useTheme, type ThemePreference } from "@/lib/theme"
 import styles from "./AccountMenu.module.css"
 
@@ -27,13 +37,14 @@ export function AccountMenu() {
   const navigate = useNavigate()
   const session = useSession()
   const signOut = useSignOut()
+  const resetTips = useResetTips()
   const { preference, setPreference } = useTheme()
   const user = session.data?.user
   const name = user ? `${user.firstName} ${user.lastName}`.trim() : ""
 
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className={styles.trigger} aria-label="Account menu">
+      <DropdownMenuTrigger className={styles.trigger} aria-label="Account menu" data-tour="account">
         <Avatar name={name} />
         <ChevronDown className={styles.chevron} aria-hidden />
       </DropdownMenuTrigger>
@@ -51,6 +62,9 @@ export function AccountMenu() {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/settings")}>
           <Settings aria-hidden /> Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={resetTips.isPending} onClick={() => resetTips.mutate()}>
+          <Lightbulb aria-hidden /> Replay tour and tips
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

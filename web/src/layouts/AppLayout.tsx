@@ -1,9 +1,11 @@
 import { UserRound } from "lucide-react"
 import { NavLink, Outlet, useLocation, useNavigation } from "react-router"
 import { BrandMark } from "@/components/common/BrandMark"
+import { PageBanner } from "@/components/common/pageBanner"
 import { PageIcon } from "@/components/common/pageIcon"
 import { SetupPrompt } from "@/features/dashboard/components/SetupPrompt"
 import { useConversationCounts } from "@/features/inbox"
+import { PageTip, ProductTour } from "@/features/onboarding"
 import { cn } from "@/lib/utils"
 import { AccountMenu } from "./AccountMenu"
 import { mainNav, settingsNav, type NavItem } from "./navigation"
@@ -64,10 +66,14 @@ export function AppLayout() {
 
         <main className={styles.main}>
           <PageIcon.Provider value={icon}>
-            <Outlet />
+            <PageBanner.Provider value={<PageTip />}>
+              <Outlet />
+            </PageBanner.Provider>
           </PageIcon.Provider>
         </main>
       </div>
+
+      <ProductTour />
     </div>
   )
 }
@@ -76,7 +82,11 @@ function NavItemLink({ item }: { item: NavItem }) {
   const Icon = item.icon
 
   return (
-    <NavLink to={item.to} className={({ isActive }) => cn(styles.link, isActive && styles.active)}>
+    <NavLink
+      to={item.to}
+      className={({ isActive }) => cn(styles.link, isActive && styles.active)}
+      data-tour={item.to.slice(1)}
+    >
       <Icon className={styles.linkIcon} aria-hidden />
       {item.label}
       {item.unread && <UnreadBadge />}

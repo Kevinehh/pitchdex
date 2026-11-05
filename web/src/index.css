@@ -165,6 +165,8 @@
   --warning: oklch(0.6 0.16 50);
   --star: oklch(0.75 0.17 70);
   --shadow-popover: 0 12px 32px rgb(16 24 40 / 14%);
+  /* Dims the page behind the tour. */
+  --scrim: rgb(16 24 40 / 50%);
   /* Each kind of send keeps its colour: invitations --brand, LinkedIn messages and emails these. */
   --linkedin: #0284c7;
   --linkedin-soft: rgb(2 132 199 / 10%);
@@ -181,6 +183,7 @@
   --warning: oklch(0.7 0.16 45);
   --star: oklch(0.8 0.15 85);
   --shadow-popover: 0 12px 32px rgb(0 0 0 / 45%);
+  --scrim: rgb(0 0 0 / 68%);
   --linkedin: #38bdf8;
   --linkedin-soft: rgb(56 189 248 / 14%);
   --email: #2dd4bf;

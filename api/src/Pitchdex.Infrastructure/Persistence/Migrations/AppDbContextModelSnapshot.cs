@@ -970,11 +970,44 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("HeardFrom")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("heard_from");
+
+                    b.PrimitiveCollection<List<string>>("Industries")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("industries")
+                        .HasDefaultValueSql("'{}'");
+
+                    b.PrimitiveCollection<List<string>>("InvestorGeographies")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("investor_geographies")
+                        .HasDefaultValueSql("'{}'");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("OnboardedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("onboarded_at");
+
+                    b.Property<string>("RaiseSize")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("raise_size");
+
+                    b.Property<string>("RaiseStage")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("raise_stage");
 
                     b.Property<int>("SendFromHour")
                         .HasColumnType("integer")
@@ -1111,6 +1144,13 @@ namespace Pitchdex.Infrastructure.Persistence.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text")
                         .HasColumnName("security_stamp");
+
+                    b.PrimitiveCollection<List<string>>("SeenTips")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("seen_tips")
+                        .HasDefaultValueSql("'{}'");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean")

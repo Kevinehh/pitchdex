@@ -45,6 +45,7 @@ export function QuickSearch() {
       <button
         type="button"
         className={styles.trigger}
+        data-tour="search"
         onClick={() => setOpen(true)}
         aria-label="Search"
         aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"}
